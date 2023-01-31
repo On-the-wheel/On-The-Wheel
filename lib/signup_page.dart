@@ -90,12 +90,15 @@ class _SignUpState extends State<SignUp> {
                             labelText: '휴대폰 번호', hintText: '010-0000-0000'),
                       ),
                     ),
-                    ElevatedButton(
-                      onPressed: () {},
-                      child: Text("인증번호 받기"),
-                      style: ButtonStyle(
-                          backgroundColor:
-                              MaterialStateProperty.all(Color(0xffBCCF9B))),
+                    Container(
+                      width: 115,
+                      child: ElevatedButton(
+                        onPressed: () {},
+                        child: Text("인증번호 받기"),
+                        style: ButtonStyle(
+                            backgroundColor:
+                                MaterialStateProperty.all(Color(0xffBCCF9B))),
+                      ),
                     )
                   ],
                 ),
@@ -107,12 +110,15 @@ class _SignUpState extends State<SignUp> {
                             labelText: '인증번호', hintText: '숫자 6개 입력'),
                       ),
                     ),
-                    ElevatedButton(
-                      onPressed: () {},
-                      child: Text("확인"),
-                      style: ButtonStyle(
-                          backgroundColor:
-                              MaterialStateProperty.all(Color(0xffBCCF9B))),
+                    Container(
+                      width: 115,
+                      child: ElevatedButton(
+                        onPressed: () {},
+                        child: Text("확인"),
+                        style: ButtonStyle(
+                            backgroundColor:
+                                MaterialStateProperty.all(Color(0xffBCCF9B))),
+                      ),
                     )
                   ],
                 ),

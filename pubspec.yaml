@@ -39,6 +39,11 @@ dependencies:
   get: ^4.6.5
   naver_map_plugin:
     git: https://github.com/LBSTECH/naver_map_plugin.git
+  dropdown_formfield: ^0.1.4
+  dio: ^4.0.6
+  image_picker: ^0.8.6+1
+  dotted_border: ^2.0.0+3
+
 
 
 dev_dependencies:

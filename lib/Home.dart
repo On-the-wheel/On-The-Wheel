@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 
+import 'GetPlaceImage.dart';
 import 'loginPage.dart';
 import 'map/naverMap.dart';
+import 'map/newPlace.dart';
 
 class Home extends StatelessWidget {
   const Home({Key? key}) : super(key: key);
