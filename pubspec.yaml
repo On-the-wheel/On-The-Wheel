@@ -46,6 +46,8 @@ dependencies:
   firebase_core: ^2.4.1
   cloud_firestore: ^4.3.1
   google_sign_in: ^5.4.4
+  geolocator: ^9.0.2
+  flutter_naver_map: ^0.10.5
 
 
 
