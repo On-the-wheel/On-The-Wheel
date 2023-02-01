@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -8,7 +9,12 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:onthewheelpractice/signup_page.dart';
 
 import 'Home.dart';
+
+import 'login/kakao_login.dart';
+import 'login/main_view_modal.dart';
 import 'map/naverMap.dart';
+
+
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -18,6 +24,7 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+  final viewModel = MainViewModel(KakaoLogin());
 
   CollectionReference database = FirebaseFirestore.instance.collection('user');
   late QuerySnapshot querySnapshot;
@@ -105,13 +112,13 @@ class _LoginState extends State<Login> {
                   children: [
                     TextField(
                       decoration: InputDecoration(
-                        prefixIcon: Icon(Icons.account_circle,size: 35,color: Colors.black,),
-                        hintText: '아이디',
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        filled: true,
-                        fillColor: Colors.white70
+                          prefixIcon: Icon(Icons.account_circle,size: 35,color: Colors.black,),
+                          hintText: '아이디',
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          filled: true,
+                          fillColor: Colors.white70
                       ),
                     ),
                   ],
@@ -172,11 +179,11 @@ class _LoginState extends State<Login> {
                       ),
                       style: ButtonStyle(
                           shape:
-                              MaterialStateProperty.all<RoundedRectangleBorder>(
-                                  RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(20))),
+                          MaterialStateProperty.all<RoundedRectangleBorder>(
+                              RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20))),
                           backgroundColor:
-                              MaterialStateProperty.all<Color>(Colors.grey))),
+                          MaterialStateProperty.all<Color>(Colors.grey))),
                 ],
               ),
               SizedBox(
@@ -187,8 +194,11 @@ class _LoginState extends State<Login> {
                   SizedBox(
                     width: 60,
                   ),
+
                   ElevatedButton.icon(
-                      onPressed: () {},
+                      onPressed: () async {
+                        await viewModel.login();
+                      },
                       icon: Icon(Icons.chat_bubble,color: Color(0xff9D6F45),),
                       label: Text(
                         "카카오톡",
@@ -196,11 +206,11 @@ class _LoginState extends State<Login> {
                       ),
                       style: ButtonStyle(
                           shape:
-                              MaterialStateProperty.all<RoundedRectangleBorder>(
-                                  RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(20))),
+                          MaterialStateProperty.all<RoundedRectangleBorder>(
+                              RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20))),
                           backgroundColor:
-                              MaterialStateProperty.all<Color>(Color(0xffFFF38A)))),
+                          MaterialStateProperty.all<Color>(Color(0xffFFF38A)))),
                   SizedBox(width: 20,),
                   ElevatedButton.icon(
                       onPressed: () async {
@@ -234,7 +244,7 @@ class _LoginState extends State<Login> {
                   SizedBox(width: 70,),
                   Text("아직 회원이 아니세요?     |   ",style: TextStyle(color: Color(0x69000000)),),
                   TextButton(onPressed: (){
-                    Get.to(SignUp());
+                    Get.to(() => SignUp());
                   },
                       child: Text("회원가입",style: TextStyle(color: Colors.red,fontSize: 17),)
                   )
