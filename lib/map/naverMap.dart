@@ -22,18 +22,51 @@ class _NaverMapTestState extends State<NaverMapTest> {
     return Scaffold(
       appBar: AppBar(title: const Text('NaverMap Test')),
       body: Container(
-        child: NaverMap(
-          onMapCreated: onMapCreated,
-          mapType: _mapType,
+        child: Stack(
+          children: [
+            NaverMap(
+              zoomGestureEnable: true,
+              onMapCreated: onMapCreated,
+              mapType: _mapType,
+            ),
+            Row(
+              children: [
+                //Padding(padding: EdgeInsets.fromLTRB(-, 30, 30, 30)),
+                IconButton(
+                    onPressed: () {},
+                    icon: Icon(
+                      Icons.menu,
+                      size: 30,
+                    )),
+
+
+              ],
+            )
+          ],
         ),
       ),
       bottomNavigationBar: BottomAppBar(
-        child: Row(
-          children: [
-            IconButton(onPressed: (){
-              Get.to(Newplace());
-            }, icon: Icon(Icons.abc))
-          ],
+        child: Container(
+          child: Row(
+            children: [
+              IconButton(
+                  onPressed: () {
+                    Get.to(Newplace());
+                  },
+                  icon: Icon(
+                    Icons.add_circle,
+                    color: Colors.lightGreen,
+                    size: 40,
+                  )),
+              TextButton(
+                onPressed: () {},
+                child: Text(
+                  "콜택시",
+                  style: TextStyle(color: Colors.black, fontSize: 20),
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );
