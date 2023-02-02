@@ -1,15 +1,19 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:onthewheelpractice/Info.dart';
 
 import 'Home.dart';
 
+
+
 class Start extends StatefulWidget {
   const Start({Key? key}) : super(key: key);
-
   @override
   State<Start> createState() => _StartState();
 }
