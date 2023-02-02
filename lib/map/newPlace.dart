@@ -2,9 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
-import 'package:onthewheelpractice/map/MapProvider.dart';
 
-import '../Home.dart';
 import 'naverMap.dart';
 import 'newlaceNext.dart';
 
@@ -33,7 +31,7 @@ class _NewplaceState extends State<Newplace> {
               children: [
                 IconButton(
                   onPressed: () {
-                    Get.off(NaverMapTest(mapProvider: MapProvider(),));
+                    Get.off(NaverMapTest());
                   },
                   icon: Icon(
                     Icons.arrow_back,

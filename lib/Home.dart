@@ -5,7 +5,6 @@ import 'package:get/get_core/src/get_main.dart';
 
 import 'GetPlaceImage.dart';
 import 'loginPage.dart';
-import 'map/MapProvider.dart';
 import 'map/naverMap.dart';
 import 'map/newPlace.dart';
 
@@ -110,7 +109,7 @@ class LoginIcon extends StatelessWidget {
       children: [
         ElevatedButton.icon(
           onPressed: () {
-            Get.to(NaverMapTest(mapProvider: MapProvider(),));
+            Get.to(NaverMapTest());
           },
           icon: Icon(
             Icons.error,

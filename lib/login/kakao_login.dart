@@ -3,7 +3,6 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:onthewheelpractice/login/social_login.dart';
 
-import '../map/MapProvider.dart';
 import '../map/naverMap.dart';
 
 class KakaoLogin implements SocialLogin {
@@ -14,7 +13,7 @@ class KakaoLogin implements SocialLogin {
       if (isInstalled) {
         try {
           await UserApi.instance.loginWithKakaoTalk();
-          Get.to(()=>NaverMapTest(mapProvider: MapProvider(),));
+          Get.to(()=>NaverMapTest());
           print("카카오 로그인 앱으로 성공");
           return true;
         } catch (e) {
@@ -24,7 +23,7 @@ class KakaoLogin implements SocialLogin {
       } else {
         try {
           await UserApi.instance.loginWithKakaoAccount();
-          Get.to(()=>NaverMapTest(mapProvider: MapProvider(),));
+          Get.to(()=>NaverMapTest());
           print("카카오 로그인 웹으로 성공");
           return true;
         } catch (e) {
