@@ -29,6 +29,7 @@ class _NaverMapTestState extends State<NaverMapTest> {
 
   @override
   Widget build(BuildContext context) {
+
     Firebase.initializeApp();
 
     return StreamBuilder(
@@ -129,19 +130,32 @@ class _NaverMapTestState extends State<NaverMapTest> {
               ),
             ),
             bottomNavigationBar: BottomAppBar(
-              color: Colors.lightGreen,
-              child: Row(
-                children: [
-                  IconButton(
-                      onPressed: () {
-                        Get.to(Newplace());
-                      },
-                      icon: Icon(Icons.abc))
-                ],
-              ),
-            ),
+        child: Container(
+          child: Row(
+            children: [
+              IconButton(
+                  onPressed: () {
+                    Get.to(Newplace());
+                  },
+                  icon: Icon(
+                    Icons.add_circle,
+                    color: Colors.lightGreen,
+                    size: 40,
+                  )),
+              TextButton(
+                onPressed: () {},
+                child: Text(
+                  "콜택시",
+                  style: TextStyle(color: Colors.black, fontSize: 20),
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
           );
         });
+
   }
 
   void onMapCreated(NaverMapController controller) {
