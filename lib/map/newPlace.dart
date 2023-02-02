@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:onthewheelpractice/map/addImage.dart';
 
 import 'naverMap.dart';
 import 'newlaceNext.dart';
@@ -149,7 +150,7 @@ class _NewplaceState extends State<Newplace> {
                   width: 360,
                   child: ElevatedButton.icon(
                     onPressed: () {
-                      //et.to(Getimage());
+                      Get.to(AddImages());
                     },
                     icon: Icon(
                       Icons.photo_camera,
