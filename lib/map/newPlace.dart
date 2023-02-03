@@ -32,7 +32,7 @@ class _NewplaceState extends State<Newplace> {
               children: [
                 IconButton(
                   onPressed: () {
-                    Get.off(NaverMapTest());
+                    Get.back();
                   },
                   icon: Icon(
                     Icons.arrow_back,

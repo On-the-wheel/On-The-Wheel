@@ -8,10 +8,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:naver_map_plugin/naver_map_plugin.dart';
+import 'package:onthewheelpractice/map/placeModal.dart';
 
 import '../Info.dart';
 import '../placeinfo.dart';
 import '../search_screen.dart';
+import '../size.dart';
 import 'myPage/myPage_FAQ.dart';
 import 'myPage/myPage_notice.dart';
 import 'newPlace.dart';
@@ -36,58 +38,37 @@ class _NaverMapTestState extends State<NaverMapTest> {
   @override
   Widget build(BuildContext context) {
     Firebase.initializeApp();
+    all_marker.clear();
+    bokji_marker.clear();
+    mart_marker.clear();
+    rest_marker.clear();
 
     return StreamBuilder(
-        stream: FirebaseFirestore.instance
-            .collection('place')
-            .orderBy('id', descending: false)
-            .snapshots(),
-        builder: (BuildContext context,
-            AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
-          // for (int i = 0; i < snapshot.data!.docs.length; i++) {
-          //   var places = snapshot.data!.docs[i];
-          //   var name = places.get('name');
-          //   var info = places.get('info');
-          //   var latitude = places.get('latitude');
-          //   var longitude = places.get('longitude');
-          //   var category = places.get('category');
-          //   print(name + " : " + info + "\n");
-          //
-          //   if (category == "복지시설") {
-          //     bokji_marker.add(
-          //       Marker(
-          //           width: 40,
-          //           height: 50,
-          //           position: LatLng(latitude, longitude),
-          //           markerId: places.get('name'),
-          //           iconTintColor: Colors.blueAccent),
-          //     );
-          //     all_marker.add(Marker(
-          //         width: 40,
-          //         height: 50,
-          //         position: LatLng(latitude, longitude),
-          //         markerId: places.get('name'),
-          //         iconTintColor: Colors.blueAccent));
-          //   } else if (category == "마트") {
-          //     mart_marker.add(Marker(
-          //         position: LatLng(latitude, longitude),
-          //         markerId: places.get('name'),
-          //         iconTintColor: Colors.redAccent));
-          //     all_marker.add(Marker(
-          //         position: LatLng(latitude, longitude),
-          //         markerId: places.get('name'),
-          //         iconTintColor: Colors.redAccent));
-          //   } else if (category == "식당") {
-          //     rest_marker.add(Marker(
-          //         position: LatLng(latitude, longitude),
-          //         markerId: places.get('name'),
-          //         iconTintColor: Colors.purpleAccent));
-          //     all_marker.add(Marker(
-          //         position: LatLng(latitude, longitude),
-          //         markerId: places.get('name'),
-          //         iconTintColor: Colors.purpleAccent));
-          //   }
-          // }
+        stream: FirebaseFirestore.instance.collection('place').orderBy('id', descending: false).snapshots(),
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
+          for (int i = 0; i <3 ; i++) {
+            // snapshot.data!.docs.length
+            var places = snapshot.data!.docs[i];
+
+            var name = places.get('name');
+            var info = places.get('info');
+            var location = places.get('location');
+            var latitude = places.get('latitude');
+            var longitude = places.get('longitude');
+            var category = places.get('category');
+            print(name + " : " + info + "\n");
+
+            if (category == "복지시설") {
+              bokji_marker.add(makeMarker(name, category, location, latitude, longitude, info, Colors.blueAccent));
+              all_marker.add(makeMarker(name, category, location, latitude, longitude, info,Colors.blueAccent));
+            } else if (category == "마트") {
+              mart_marker.add(makeMarker(name, category, location, latitude, longitude, info,Colors.redAccent));
+              all_marker.add(makeMarker(name, category, location, latitude, longitude, info,Colors.redAccent));
+            } else if (category == "식당") {
+              rest_marker.add(makeMarker(name, category, location, latitude, longitude, info,Colors.purpleAccent));
+              all_marker.add(makeMarker(name, category, location, latitude, longitude, info,Colors.purpleAccent));
+            }
+          }
 
           return Scaffold(
             key: _scaffoldKey,
@@ -305,5 +286,31 @@ class _NaverMapTestState extends State<NaverMapTest> {
   void onMapCreated(NaverMapController controller) {
     if (_controller.isCompleted) _controller = Completer();
     _controller.complete(controller);
+  }
+
+  Marker makeMarker(String name, String category, String location, double latitude, double longitude, String info, Color color){
+    return Marker(
+
+        onMarkerTab: (marker, iconSize) {
+          showModalBottomSheet(
+              isScrollControlled: true,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(10)
+                  )
+              ),
+              context: context,
+              builder: (context)=> Container(
+                height: getScreenHeight(context)*0.3,
+                child: placeModal(name, category, location, info),
+              )
+          );
+        },
+        width: 40,
+        height: 50,
+        position: LatLng(latitude, longitude),
+        markerId: name,
+        iconTintColor: color
+    );
   }
 }
