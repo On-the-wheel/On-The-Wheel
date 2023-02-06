@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:onthewheelpractice/size.dart';
 
 class placeModal extends StatelessWidget {
-  placeModal(this.name, this.category, this.location, this.info, {Key? key}) : super(key: key);
+  placeModal(this.name, this.category, this.location, this.info, {Key? key})
+      : super(key: key);
   String name;
   String category;
   String location;
@@ -20,42 +21,60 @@ class placeModal extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Container(
-                width: getScreenWidth(context)*0.5,
+                width: getScreenWidth(context) * 0.5,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Text(name,style: TextStyle(fontSize:20, fontWeight: FontWeight.w600),),
+                        Text(
+                          name,
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.w600),
+                        ),
                         SizedBox(width: 10),
-
                         Padding(
                           padding: const EdgeInsets.only(top: 5.0),
-                          child: Text(category, style: TextStyle(fontSize:12, fontWeight: FontWeight.w600,color: Colors.grey ),),
+                          child: Text(
+                            category,
+                            style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey),
+                          ),
                         ),
                       ],
                     ),
-                    SizedBox(height: 3,),
+                    SizedBox(
+                      height: 3,
+                    ),
                     Divider(thickness: 1),
                     SizedBox(height: 3),
-                    Text(location, style: TextStyle(fontSize:15, fontWeight: FontWeight.w300)),
+                    Text(location,
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.w300)),
                     SizedBox(height: 5),
-                    Text("전화번호 + 내 위치로부터 거리계산", style: TextStyle(fontSize:15, fontWeight: FontWeight.w300)),
+                    Text("전화번호 + 내 위치로부터 거리계산",
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.w300)),
                     SizedBox(height: 10),
-                    Divider(thickness: 1,),
+                    Divider(
+                      thickness: 1,
+                    ),
                   ],
                 ),
               ),
               //사진!!!!!!!!!!!!!!!!!!!!!!!
-              SizedBox(width: getScreenWidth(context)*0.05,),
+              SizedBox(
+                width: getScreenWidth(context) * 0.05,
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    width: getScreenWidth(context)*0.35,
-                    height: getScreenHeight(context)*0.2,
-
+                    width: getScreenWidth(context) * 0.35,
+                    height: getScreenHeight(context) * 0.2,
                     decoration: BoxDecoration(
                       image: DecorationImage(
                         image: AssetImage('assets/images/hgu.png'),
@@ -66,10 +85,64 @@ class placeModal extends StatelessWidget {
               )
             ],
           ),
-
-
+          iconMaker(info, context)
         ],
       ),
     );
+  }
+
+  Container iconMaker(String s, BuildContext context) {
+    List<String> result = s.split(',');
+    List<Icon> Icondata = []; //
+
+    return Container(
+      width: getScreenWidth(context),
+      height: getScreenHeight(context) * 0.05,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children:getList(result)
+      ),
+    );
+  }
+
+  List<Widget> getList(List<String> result){
+    List<Widget> childs = [];
+    for (int i = 0; i < result.length; i++) {
+      print(result[i]);
+      if (result[i] == "문턱 없음") {
+        childs.add(Icon(Icons.dangerous_outlined, size: 35,));
+        childs.add(SizedBox(width: 15));
+      }
+      else if (result[i] == "주출입구 접근로"){
+        childs.add(Icon(Icons.circle_outlined, size: 35));
+        childs.add(SizedBox(width: 15));
+      }
+      else if (result[i] == "주출입구 높이차이 제거"){
+        childs.add(Icon(CupertinoIcons.arrow_up_right, size: 35));
+        childs.add(SizedBox(width: 15));
+      }
+      else if (result[i] == "계단 또는 승강설비"){
+        childs.add(Icon(Icons.elevator, size: 35));
+        childs.add(SizedBox(width: 15));
+      }
+      else if (result[i] == "장애인전용주차구역"){
+        childs.add(Icon(Icons.local_parking, size: 35));
+        childs.add(SizedBox(width: 15));
+      }
+      else if (result[i] == "소변기"){
+        childs.add(Icon(Icons.water, size: 35));
+        childs.add(SizedBox(width: 15));
+      }
+      else if (result[i] == "대변기"){
+        childs.add(Icon(CupertinoIcons.tortoise, size: 35));
+        childs.add(SizedBox(width: 15));
+      }
+      else if (result[i] == "1층에 위치"){
+        childs.add(Icon(Icons.numbers, size: 35));
+        childs.add(SizedBox(width: 15));
+      }
+    }
+
+    return childs;
   }
 }

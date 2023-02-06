@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:naver_map_plugin/naver_map_plugin.dart';
+// import 'package:naver_map_plugin-d6029c020e13c926ff5f94b445b4f65abb48b85f/lib/src/overlay_image.dart';
 import 'package:onthewheelpractice/map/placeModal.dart';
 
 import '../Info.dart';
@@ -44,242 +45,397 @@ class _NaverMapTestState extends State<NaverMapTest> {
     rest_marker.clear();
 
     return StreamBuilder(
-        stream: FirebaseFirestore.instance.collection('place').orderBy('id', descending: false).snapshots(),
-        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
-          for (int i = 0; i <3 ; i++) {
-            // snapshot.data!.docs.length
-            var places = snapshot.data!.docs[i];
+        stream: FirebaseFirestore.instance
+            .collection('place')
+            .orderBy('id', descending: false)
+            .snapshots(),
+        builder: (BuildContext context,
+            AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          } else {
+            for (int i = 0; i < snapshot.data!.docs.length; i++) {
+              // snapshot.data!.docs.length
+              var places = snapshot.data!.docs[i];
 
-            var name = places.get('name');
-            var info = places.get('info');
-            var location = places.get('location');
-            var latitude = places.get('latitude');
-            var longitude = places.get('longitude');
-            var category = places.get('category');
-            print(name + " : " + info + "\n");
+              var name = places.get('name');
+              var info = places.get('info');
+              var location = places.get('location');
+              var latitude = places.get('latitude');
+              var longitude = places.get('longitude');
+              var category = places.get('category');
+              print(name + " : " + info + "\n");
 
-            if (category == "복지시설") {
-              bokji_marker.add(makeMarker(name, category, location, latitude, longitude, info, Colors.blueAccent));
-              all_marker.add(makeMarker(name, category, location, latitude, longitude, info,Colors.blueAccent));
-            } else if (category == "마트") {
-              mart_marker.add(makeMarker(name, category, location, latitude, longitude, info,Colors.redAccent));
-              all_marker.add(makeMarker(name, category, location, latitude, longitude, info,Colors.redAccent));
-            } else if (category == "식당") {
-              rest_marker.add(makeMarker(name, category, location, latitude, longitude, info,Colors.purpleAccent));
-              all_marker.add(makeMarker(name, category, location, latitude, longitude, info,Colors.purpleAccent));
+              if (category == "복지시설") {
+                bokji_marker.add(makeMarker(name, category, location, latitude,
+                    longitude, info, Colors.blueAccent));
+                all_marker.add(makeMarker(name, category, location, latitude,
+                    longitude, info, Colors.blueAccent));
+              } else if (category == "마트") {
+                mart_marker.add(makeMarker(name, category, location, latitude,
+                    longitude, info, Colors.redAccent));
+                all_marker.add(makeMarker(name, category, location, latitude,
+                    longitude, info, Colors.redAccent));
+              } else if (category == "식당") {
+                rest_marker.add(makeMarker(name, category, location, latitude,
+                    longitude, info, Colors.purpleAccent));
+                all_marker.add(makeMarker(name, category, location, latitude,
+                    longitude, info, Colors.purpleAccent));
+              }
             }
-          }
 
-          return Scaffold(
-            key: _scaffoldKey,
-            body: SafeArea(
-              child: Stack(
-                children: <Widget>[
-                  Container(
-                    child: NaverMap(
-                      onMapCreated: onMapCreated,
-                      mapType: _mapType,
-                      markers: all_marker,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(4, 6, 0, 0),
-                    child: IconButton(
-                        onPressed: () {
-                          _scaffoldKey.currentState?.openDrawer();
-                        },
-                        icon: Icon(Icons.menu, size: 30)),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(50, 8, 8, 8),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20.0),
-                      child: Container(
-                        width: 500,
-                        height: 50,
-                        color: Colors.white,
-                        child: Row(children: <Widget>[
-                          Expanded(
-                              child: TextField(
-                            onTap: () {
-                              Get.to(SearchScreen());
-                              FocusManager.instance.primaryFocus?.unfocus();
-                            },
-                            decoration: InputDecoration(
-                              prefixIcon: Icon(
-                                Icons.search,
-                                color: Colors.black,
-                                size: 20,
-                              ),
-                              hintText: '검색',
-                              labelStyle: TextStyle(color: Colors.black),
-                            ),
-                          )),
-                        ]),
+            return Scaffold(
+              key: _scaffoldKey,
+              body: SafeArea(
+                child: Stack(
+                  children: <Widget>[
+                    Container(
+                      child: NaverMap(
+                        onMapCreated: onMapCreated,
+                        mapType: _mapType,
+                        markers: all_marker,
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-            bottomNavigationBar: BottomAppBar(),
-            drawer: Drawer(
-              child: ListView(
-                padding: EdgeInsets.zero,
-                children: [
-                  DrawerHeader(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            CircleAvatar(
-                              radius: 40,
-                              backgroundImage: NetworkImage(imageUrl1),
-                            ),
-                            SizedBox(
-                              width: 15,
-                            ),
-                            Column(
-                              children: [
-                                Text('온더휠 님', style: TextStyle(fontSize: 15)),
-                                Text('Lv.3',
-                                    style: TextStyle(
-                                        fontSize: 12,
-                                        color: Color(0xFF968686))),
-                                Text('회원정보수정',
-                                    style: TextStyle(
-                                        fontSize: 12, color: Color(0xFF968686)))
-                              ],
-                            )
-                          ],
-                        ),
-                        Divider(
-                          color: Colors.black,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Column(children: [
-                              Text(
-                                '장소 등록 6건',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                ),
-                              ),
-                            ]),
-                            VerticalDivider(
-                              thickness: 1,
-                              color: Colors.black,
-                            ),
-                            Column(children: [
-                              Text(
-                                '장소 평가 7건',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                ),
-                              ),
-                            ]),
-                          ],
-                        ),
-                        Divider(
-                          color: Colors.black,
-                        ),
-                      ],
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(4, 6, 0, 0),
+                      child: IconButton(
+                          onPressed: () {
+                            _scaffoldKey.currentState?.openDrawer();
+                          },
+                          icon: Icon(Icons.menu, size: 30)),
                     ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                    ),
-                  ),
-                  ListTile(
-                    title: Text('공지 사항'),
-                    onTap: () {
-                      Get.to(MyPage_notice());
-                    },
-                  ),
-                  ListTile(
-                    title: Text('FAQ'),
-                    onTap: () {
-                      Get.to(MyPage_FAQ());
-                    },
-                  ),
-                  ListTile(
-                    title: Text('문의'),
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                  ListTile(
-                    title: Text('설정'),
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                  ListTile(
-                    title: Text('Log Out'),
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                ],
-              ),
-            ),
-            floatingActionButton: Stack(
-              children: <Widget>[
-                Align(
-                  //장소등록 '+' 아이콘
-                  alignment: Alignment(
-                      Alignment.bottomRight.x, Alignment.bottomRight.y - 0.4),
-                  child: FloatingActionButton(
-                    onPressed: () {
-                      Get.to(Newplace());
-                    },
-                    child: Icon(Icons.add),
-                  ),
-                ),
-                Align(
-                  //장애인 콜택시 전화연결 아이콘
-                  alignment: Alignment(
-                      Alignment.bottomRight.x, Alignment.bottomRight.y - 0.2),
-                  child: FloatingActionButton(
-                    onPressed: () {
-                      showDialog<String>(
-                        context: context,
-                        builder: (BuildContext context) => AlertDialog(
-                          title: Text("포항북구 장애인 콜택시"),
-                          content: Text('054-231-1117'),
-                          actions: <Widget>[
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(),
-                              child: Text('취소'),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                setState(() {});
-                                Navigator.of(context).pop();
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(50, 8, 8, 8),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20.0),
+                        child: Container(
+                          width: 500,
+                          height: 50,
+                          color: Colors.white,
+                          child: Row(children: <Widget>[
+                            Expanded(
+                                child: TextField(
+                              onTap: () {
+                                Get.to(SearchScreen());
+                                FocusManager.instance.primaryFocus?.unfocus();
                               },
-                              child: Text('연락하기'),
-                            ),
-                          ],
+                              decoration: InputDecoration(
+                                prefixIcon: Icon(
+                                  Icons.search,
+                                  color: Colors.black,
+                                  size: 20,
+                                ),
+                                hintText: '검색',
+                                labelStyle: TextStyle(color: Colors.black),
+                              ),
+                            )),
+                          ]),
                         ),
-                      );
-                    },
-                    child: Icon(Icons.local_taxi),
-                  ),
+                      ),
+                    ),
+
+                    Padding(padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                      child: Row(
+                        // mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            height: 160,
+                            width: 17,
+                          ),
+                        ],
+
+                      ),),
+                    Padding(padding: const EdgeInsets.fromLTRB(10, 60, 0, 0),
+                      child: Column(
+                        children: [
+                          Container(
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: [
+
+                                  OutlinedButton(onPressed: (){}, child: Text(" 음식점 "),
+                                    style: ElevatedButton.styleFrom(
+
+                                      shape: RoundedRectangleBorder(	//모서리를 둥글게
+                                          borderRadius: BorderRadius.circular(15)),
+                                      side: BorderSide(
+                                        color: Colors.lightGreen,
+                                      ),
+                                      textStyle: TextStyle(
+                                        fontWeight: FontWeight.w600,
+
+                                      ),
+                                      foregroundColor: Colors.lightGreen,
+                                      backgroundColor: Colors.white,
+
+
+                                    ),),
+                                  SizedBox(width: 10,),
+                                  OutlinedButton(onPressed: (){}, child: Text("  카페 "),style: ElevatedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(	//모서리를 둥글게
+                                        borderRadius: BorderRadius.circular(15)),   textStyle: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                    foregroundColor: Colors.white,
+                                    backgroundColor: Colors.lightGreen,),
+                                  ),
+                                  SizedBox(width: 10,),
+                                  OutlinedButton(onPressed: (){}, child: Text("  병원 "),style: ElevatedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(	//모서리를 둥글게
+                                        borderRadius: BorderRadius.circular(15)),   textStyle: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                    foregroundColor: Colors.white,
+                                    backgroundColor: Colors.lightGreen,),
+                                  ),
+                                  SizedBox(width: 10,),
+                                  OutlinedButton(onPressed: (){}, child: Text("복지 시설"),style: ElevatedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(	//모서리를 둥글게
+                                        borderRadius: BorderRadius.circular(15)),   textStyle: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                    foregroundColor: Colors.white,
+                                    backgroundColor: Colors.lightGreen,),
+                                  ),
+                                  SizedBox(width: 10,),
+                                  OutlinedButton(onPressed: (){}, child: Text("편의 시설"),style: ElevatedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(	//모서리를 둥글게
+                                        borderRadius: BorderRadius.circular(15)),   textStyle: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                    foregroundColor: Colors.white,
+                                    backgroundColor: Colors.lightGreen,),
+                                  ),
+                                  SizedBox(width: 10,),
+                                  OutlinedButton(onPressed: (){}, child: Text(" 화장실 "),style: ElevatedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(	//모서리를 둥글게
+                                        borderRadius: BorderRadius.circular(15)),   textStyle: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                    side: BorderSide(
+                                      color: Colors.lightGreen,
+                                    ),
+                                    foregroundColor: Color(0xffBCCF9B),
+                                    backgroundColor: Colors.white,),
+                                  ),
+                                  SizedBox(width: 10,),
+                                  OutlinedButton(onPressed: (){}, child: Text(" 마트 "),style: ElevatedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(	//모서리를 둥글게
+                                        borderRadius: BorderRadius.circular(15)),   textStyle: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                    foregroundColor: Color(0xffBCCF9B),
+                                    backgroundColor: Colors.white,),
+                                  ),
+                                  SizedBox(width: 10,),
+                                  OutlinedButton(onPressed: (){}, child: Text("교육시설"),style: ElevatedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(	//모서리를 둥글게
+                                        borderRadius: BorderRadius.circular(15)),   textStyle: TextStyle(
+                                    fontWeight: FontWeight.w600,
+
+                                  ),
+                                    foregroundColor: Colors.black,
+                                    backgroundColor: Colors.white,),
+
+                                  ),
+                                  SizedBox(width: 10,),
+                                  OutlinedButton(onPressed: (){}, child: Text("숙박시설"),style: ElevatedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(	//모서리를 둥글게
+                                        borderRadius: BorderRadius.circular(15)),   textStyle: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                    foregroundColor: Colors.white,
+                                    backgroundColor: Color(0xffBCCF9B),),
+                                  ),
+                                  SizedBox(width: 10,),
+                                  OutlinedButton(onPressed: (){}, child: Text(" 기타 "),style: ElevatedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(	//모서리를 둥글게
+                                        borderRadius: BorderRadius.circular(15)),   textStyle: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                    foregroundColor: Colors.white,
+                                    backgroundColor: Color(0xffBCCF9B),),
+                                  ),
+
+                                ],
+                              ),
+                            ),
+
+                          )
+                        ],
+                      ),
+
+                    )
+
+                  ],
+
                 ),
-                Align(
-                    //현재 위치 아이콘
-                    alignment: Alignment.bottomRight,
+
+
+              ),
+              bottomNavigationBar: BottomAppBar(),
+              drawer: Drawer(
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  children: [
+                    DrawerHeader(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              CircleAvatar(
+                                radius: 40,
+                                backgroundImage: NetworkImage(imageUrl1),
+                              ),
+                              SizedBox(
+                                width: 15,
+                              ),
+                              Column(
+                                children: [
+                                  Text('온더휠 님', style: TextStyle(fontSize: 15)),
+                                  Text('Lv.3',
+                                      style: TextStyle(
+                                          fontSize: 12,
+                                          color: Color(0xFF968686))),
+                                  Text('회원정보수정',
+                                      style: TextStyle(
+                                          fontSize: 12,
+                                          color: Color(0xFF968686)))
+                                ],
+                              )
+                            ],
+                          ),
+                          Divider(
+                            color: Colors.black,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Column(children: [
+                                Text(
+                                  '장소 등록 6건',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ]),
+                              VerticalDivider(
+                                thickness: 1,
+                                color: Colors.black,
+                              ),
+                              Column(children: [
+                                Text(
+                                  '장소 평가 7건',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ]),
+                            ],
+                          ),
+                          Divider(
+                            color: Colors.black,
+                          ),
+                        ],
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                      ),
+                    ),
+                    ListTile(
+                      title: Text('공지 사항'),
+                      onTap: () {
+                        Get.to(MyPage_notice());
+                      },
+                    ),
+                    ListTile(
+                      title: Text('FAQ'),
+                      onTap: () {
+                        Get.to(MyPage_FAQ());
+                      },
+                    ),
+                    ListTile(
+                      title: Text('문의'),
+                      onTap: () {
+                        Navigator.pop(context);
+                      },
+                    ),
+                    ListTile(
+                      title: Text('설정'),
+                      onTap: () {
+                        Navigator.pop(context);
+                      },
+                    ),
+                    ListTile(
+                      title: Text('Log Out'),
+                      onTap: () {
+                        Navigator.pop(context);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              floatingActionButton: Stack(
+                children: <Widget>[
+                  Align(
+                    //장소등록 '+' 아이콘
+                    alignment: Alignment(
+                        Alignment.bottomRight.x, Alignment.bottomRight.y - 0.4),
                     child: FloatingActionButton(
                       onPressed: () {
-                        Get.to(PlaceInfo());
+                        Get.to(Newplace());
                       },
-                      child: Icon(Icons.my_location),
-                    ))
-              ],
-            ),
-          );
+                      child: Icon(Icons.add),
+                    ),
+                  ),
+                  Align(
+                    //장애인 콜택시 전화연결 아이콘
+                    alignment: Alignment(
+                        Alignment.bottomRight.x, Alignment.bottomRight.y - 0.2),
+                    child: FloatingActionButton(
+                      onPressed: () {
+                        showDialog<String>(
+                          context: context,
+                          builder: (BuildContext context) => AlertDialog(
+                            title: Text("포항북구 장애인 콜택시"),
+                            content: Text('054-231-1117'),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                child: Text('취소'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  setState(() {});
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text('연락하기'),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      child: Icon(Icons.local_taxi),
+                    ),
+                  ),
+                  Align(
+                      //현재 위치 아이콘
+                      alignment: Alignment.bottomRight,
+                      child: FloatingActionButton(
+                        onPressed: () {
+                          Get.to(PlaceInfo());
+                        },
+                        child: Icon(Icons.my_location),
+                      ))
+                ],
+              ),
+            );
+          }
         });
   }
 
@@ -288,29 +444,27 @@ class _NaverMapTestState extends State<NaverMapTest> {
     _controller.complete(controller);
   }
 
-  Marker makeMarker(String name, String category, String location, double latitude, double longitude, String info, Color color){
+  Marker makeMarker(String name, String category, String location,
+      double latitude, double longitude, String info, Color color) {
     return Marker(
-
+      // icon: OverlayImage(AssetImage('assets/images/hgu.png'), AssetBundleImageKey(null, null, null)),
+      // icon: OverlayImage(Image( image: AssetImage('assets/images/hgu.png'),)),
         onMarkerTab: (marker, iconSize) {
           showModalBottomSheet(
               isScrollControlled: true,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(10)
-                  )
-              ),
+                  borderRadius:
+                      BorderRadius.vertical(top: Radius.circular(10))),
               context: context,
-              builder: (context)=> Container(
-                height: getScreenHeight(context)*0.3,
-                child: placeModal(name, category, location, info),
-              )
-          );
+              builder: (context) => Container(
+                    height: getScreenHeight(context) * 0.3,
+                    child: placeModal(name, category, location, info),
+                  ));
         },
         width: 40,
         height: 50,
         position: LatLng(latitude, longitude),
         markerId: name,
-        iconTintColor: color
-    );
+        iconTintColor: color);
   }
 }
