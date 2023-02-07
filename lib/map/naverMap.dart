@@ -5,10 +5,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:naver_map_plugin/naver_map_plugin.dart';
-// import 'package:naver_map_plugin-d6029c020e13c926ff5f94b445b4f65abb48b85f/lib/src/overlay_image.dart';
 import 'package:onthewheelpractice/map/placeModal.dart';
 
 import '../Info.dart';
@@ -35,6 +35,14 @@ class _NaverMapTestState extends State<NaverMapTest> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final imageUrl1 =
       'https://s3-alpha-sig.figma.com/img/7e62/21e6/b66f076abc8c42787d3343a22987d8be?Expires=1676246400&Signature=UDEA3OVmYCYzhlV2QFwfb4HIA2DUI~8byJ2YtkSdYXsMDDxzv9zyaVjtDgspv0HS8H0bKq52aLSu23dQ1JCTJ0y7vioLlWuDPBIlrxMKY55rax-p-dZrI6M8au5clCPzeqFTcCd4217pPIo7C-tK61eBdkgKuyKCdh7q5yetV7AKuc2Jn85MqjoC-2tB4nMsStGqAAwUYvTUnyt56DfExgLtxGZI0~EAiBCY44BzQmdh6M6o0ZDmKr5UPoRzfQpCPuvjks9YBTTOijmFNQ36D7Ypeu9-PnuB3nhsSu8cEcY28JTIEQIq6qZ~IsiVi4bKLViz3tYOJHt54kzpFP5fxA__&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4';
+  late double lat=36.08052391749029;
+  late double lng=129.39873537642814;
+  late Position position;
+
+  Future getCurrentLocation() async {
+    position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,6 +101,7 @@ class _NaverMapTestState extends State<NaverMapTest> {
                   children: <Widget>[
                     Container(
                       child: NaverMap(
+                        initialCameraPosition: CameraPosition(target: LatLng(lat,lng)),
                         onMapCreated: onMapCreated,
                         mapType: _mapType,
                         markers: all_marker,
@@ -427,8 +436,13 @@ class _NaverMapTestState extends State<NaverMapTest> {
                       //현재 위치 아이콘
                       alignment: Alignment.bottomRight,
                       child: FloatingActionButton(
-                        onPressed: () {
-                          Get.to(PlaceInfo());
+                        onPressed: () async {
+                          getCurrentLocation();
+
+                          final controller= await _controller.future;
+                          controller.moveCamera(
+                              CameraUpdate.toCameraPosition(CameraPosition(target: LatLng(position.latitude,position.longitude)))
+                          );
                         },
                         child: Icon(Icons.my_location),
                       ))
