@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
@@ -10,15 +8,13 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:naver_map_plugin/naver_map_plugin.dart';
 import 'package:onthewheelpractice/map/placeModal.dart';
-
-import '../Info.dart';
-import '../placeinfo.dart';
 import '../search_screen.dart';
 import '../size.dart';
 import 'myPage/myPage_FAQ.dart';
 import 'myPage/myPage_notice.dart';
 import 'newPlace.dart';
 
+List<Marker> test_marker = [];
 List<Marker> rest_marker = [];
 List<Marker> bokji_marker = [];
 List<Marker> mart_marker = [];
@@ -38,19 +34,52 @@ class _NaverMapTestState extends State<NaverMapTest> {
   late double lat=36.08052391749029;
   late double lng=129.39873537642814;
   late Position position;
+  int count =0;
+
+  late OverlayImage office_image;//복지시설 아이콘
+  late OverlayImage mart_image;//마트 아이콘
+  late OverlayImage restaurant_image;// 레스토랑 아이콘
 
   Future getCurrentLocation() async {
     position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
   }
 
+  Future getImage() async {
+    office_image = await OverlayImage.fromAssetImage(assetName: "assets/images/office.png", context: context);
+    mart_image = await OverlayImage.fromAssetImage(assetName: "assets/images/mart.png", context: context);
+    restaurant_image = await OverlayImage.fromAssetImage(assetName: "assets/images/restaurant.png", context: context);
+    // else if(name == "마트") test_image = await OverlayImage.fromAssetImage(assetName: "assets/images/mart.png", context: context);
+  }
+
+
   @override
   Widget build(BuildContext context) {
+
+    if(count ==0){
+      getImage();
+      test_marker = all_marker;
+      count ++;
+      print("실행");
+    }
     Firebase.initializeApp();
+
     all_marker.clear();
     bokji_marker.clear();
     mart_marker.clear();
     rest_marker.clear();
+    NaverMap naverMap = NaverMap(
+      initialCameraPosition: CameraPosition(target: LatLng(lat,lng),),
+      onCameraChange: (latLng, reason, isAnimated){
+        lat = latLng.latitude;
+        lng = latLng.longitude;
+        print(lat);
+        print(lng);
+      },
+      onMapCreated: onMapCreated,
+      mapType: _mapType,
+      markers: test_marker,
+    );
 
     return StreamBuilder(
         stream: FirebaseFirestore.instance
@@ -64,7 +93,7 @@ class _NaverMapTestState extends State<NaverMapTest> {
               child: CircularProgressIndicator(),
             );
           } else {
-            for (int i = 0; i < snapshot.data!.docs.length; i++) {
+            for (int i = 0; i < 3; i++) {
               // snapshot.data!.docs.length
               var places = snapshot.data!.docs[i];
 
@@ -76,21 +105,23 @@ class _NaverMapTestState extends State<NaverMapTest> {
               var category = places.get('category');
               print(name + " : " + info + "\n");
 
+
+
               if (category == "복지시설") {
                 bokji_marker.add(makeMarker(name, category, location, latitude,
-                    longitude, info, Colors.blueAccent));
+                    longitude, info, Colors.blueAccent, office_image));
                 all_marker.add(makeMarker(name, category, location, latitude,
-                    longitude, info, Colors.blueAccent));
+                    longitude, info, Colors.blueAccent, office_image) );
               } else if (category == "마트") {
                 mart_marker.add(makeMarker(name, category, location, latitude,
-                    longitude, info, Colors.redAccent));
+                    longitude, info, Colors.redAccent, mart_image) );
                 all_marker.add(makeMarker(name, category, location, latitude,
-                    longitude, info, Colors.redAccent));
+                    longitude, info, Colors.redAccent, mart_image));
               } else if (category == "식당") {
                 rest_marker.add(makeMarker(name, category, location, latitude,
-                    longitude, info, Colors.purpleAccent));
+                    longitude, info, Colors.purpleAccent, restaurant_image));
                 all_marker.add(makeMarker(name, category, location, latitude,
-                    longitude, info, Colors.purpleAccent));
+                    longitude, info, Colors.purpleAccent, restaurant_image));
               }
             }
 
@@ -100,12 +131,13 @@ class _NaverMapTestState extends State<NaverMapTest> {
                 child: Stack(
                   children: <Widget>[
                     Container(
-                      child: NaverMap(
-                        initialCameraPosition: CameraPosition(target: LatLng(lat,lng)),
-                        onMapCreated: onMapCreated,
-                        mapType: _mapType,
-                        markers: all_marker,
-                      ),
+                      child: naverMap
+    // NaverMap(
+    //                     initialCameraPosition: CameraPosition(target: LatLng(lat,lng)),
+    //                     onMapCreated: onMapCreated,
+    //                     mapType: _mapType,
+    //                     markers: all_marker,
+    //                   ),
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(4, 6, 0, 0),
@@ -165,7 +197,11 @@ class _NaverMapTestState extends State<NaverMapTest> {
                               child: Row(
                                 children: [
 
-                                  OutlinedButton(onPressed: (){}, child: Text(" 음식점 "),
+                                  OutlinedButton(onPressed: (){
+                                    print("클릭");
+                                    test_marker = bokji_marker;
+                                    initState();
+                                  }, child: Text("복지시설"),
                                     style: ElevatedButton.styleFrom(
 
                                       shape: RoundedRectangleBorder(	//모서리를 둥글게
@@ -459,10 +495,19 @@ class _NaverMapTestState extends State<NaverMapTest> {
   }
 
   Marker makeMarker(String name, String category, String location,
-      double latitude, double longitude, String info, Color color) {
+      double latitude, double longitude, String info, Color color, OverlayImage test_image)  {
+    OverlayImage testImage;
+
+    // if(category == "복지시설") testImage = office_image;
+    // else if(category == "마트") testImage = mart_image;
+    // else if(category == "식당") testImage = restaurant_image;
+
     return Marker(
       // icon: OverlayImage(AssetImage('assets/images/hgu.png'), AssetBundleImageKey(null, null, null)),
       // icon: OverlayImage(Image( image: AssetImage('assets/images/hgu.png'),)),
+
+        icon:test_image,
+
         onMarkerTab: (marker, iconSize) {
           showModalBottomSheet(
               isScrollControlled: true,
@@ -471,7 +516,7 @@ class _NaverMapTestState extends State<NaverMapTest> {
                       BorderRadius.vertical(top: Radius.circular(10))),
               context: context,
               builder: (context) => Container(
-                    height: getScreenHeight(context) * 0.3,
+                    height: getScreenHeight(context) * 0.35,
                     child: placeModal(name, category, location, info),
                   ));
         },
@@ -479,6 +524,8 @@ class _NaverMapTestState extends State<NaverMapTest> {
         height: 50,
         position: LatLng(latitude, longitude),
         markerId: name,
-        iconTintColor: color);
+        );
   }
+
+
 }
