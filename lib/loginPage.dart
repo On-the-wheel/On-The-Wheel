@@ -122,6 +122,7 @@ class _LoginState extends State<Login> {
             );
           });
     }
+
     return StreamBuilder(
         stream: FirebaseFirestore.instance.collection('member').snapshots(),
         builder: (BuildContext context,
@@ -139,8 +140,8 @@ class _LoginState extends State<Login> {
           }
           return SafeArea(
               child: Scaffold(
-            body:
-              Container(
+            body: SingleChildScrollView(
+              child: Container(
                 height: getScreenHeight(context),
                 color: Color(0xffbccf9b),
                 child: Column(
@@ -154,12 +155,14 @@ class _LoginState extends State<Login> {
                     SizedBox(
                       height: 50,
                     ),
-                    Text(
-                      "   On The Wheel",
-                      style: TextStyle(
-                          fontSize: 50,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white),
+                    Center(
+                      child: Text(
+                        "On The Wheel",
+                        style: TextStyle(
+                            fontSize: 50,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white),
+                      ),
                     ),
                     SizedBox(
                       height: 220,
@@ -374,7 +377,7 @@ class _LoginState extends State<Login> {
                   ],
                 ),
               ),
-
+            ),
           ));
         });
   }

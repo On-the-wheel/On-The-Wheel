@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 
@@ -8,138 +9,121 @@ import 'loginPage.dart';
 import 'map/naverMap.dart';
 import 'map/newPlace.dart';
 
-int a = 0;
-
 class Home extends StatelessWidget {
   const Home({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: PageViewWidget(),
+      body: Carousel(),
     );
   }
 }
 
-class PageViewWidget extends StatelessWidget {
-  const PageViewWidget({Key? key}) : super(key: key);
+class Carousel extends StatefulWidget {
+  const Carousel({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  State<Carousel> createState() => _CarouselState();
+}
+
+class _CarouselState extends State<Carousel> {
+  late PageController _pageController;
+
+  List images = [
+    'assets/images/home1.png',
+    'assets/images/home2.png',
+    'assets/images/home3.png'
+  ];
+
+  int activePage = 1;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(viewportFraction: 0.8, initialPage: 1);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final PageController controller =
-    PageController(initialPage: 0, viewportFraction: 1);
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Flexible(
+              child: Container(
+                color: Colors.white,
+                child: Swiper(
+                  autoplay: true,
+                  scale: 0.9,
+                  viewportFraction: 1,
+                  pagination:  new SwiperPagination(
+                    alignment: Alignment.bottomCenter,
+                    builder: new DotSwiperPaginationBuilder(
+                        color: Colors.grey, activeColor: Color(0xFFBCCF9B)),
+                  ),
+                  itemCount: images.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return Image.asset(images[index]);
+                  },
+                ),
+              ),
+              flex: 5,
+            ),
+            Flexible(child: Column(
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Get.to(NaverMapTest());
+                  },
+                  icon: Icon(
+                    Icons.error,
+                    color: Colors.black,
+                  ),
+                  label: Text(
+                    "로그인 없이 이용하기",
+                    style: TextStyle(fontSize: 20, color: Colors.black),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                      fixedSize: const Size(280, 40),
+                      backgroundColor: Color(0xFFBFBFBF),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                      )),
+                ),
 
-    return PageView(
-      scrollDirection: Axis.horizontal,
-      controller: controller,
-      children: <Widget>[
-        Container(
-          color: Colors.white,
-          child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(height: 80,),
-                Text('안녕하세요.',style: TextStyle(fontSize: 40),),
-                Text('지금가고 싶은 그곳의',style: TextStyle(fontSize: 30),),
-                Text('정보를 제공하고 있습니다.',style: TextStyle(fontSize: 30),),
-                Text('\n',style: TextStyle(fontSize: 40),),
-                SizedBox(height: 200,),
-                LoginIcon(),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.lens,size: 15,color: Colors.black,),
-                    Icon(Icons.lens,size: 15,color: Colors.grey,),
-                    Icon(Icons.lens,size: 15,color: Colors.grey,),
-                  ],
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Get.to(Login());
+                  },
+                  icon: Icon(
+                    Icons.login,
+                    color: Colors.black,
+                  ),
+                  label: Text(
+                    "로그인 후 이용하기",
+                    style: TextStyle(fontSize: 20, color: Colors.black),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                      fixedSize: const Size(280, 40),
+                      backgroundColor: Color(0xFFBCCF9B),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                      )),
                 ),
               ],
             ),
-          ),
+              flex: 1,
+            ),
 
-        Container(
-          color: Colors.orangeAccent.withOpacity(0.5),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('두 번째 페이지',style: TextStyle(fontSize: 50),),
-                LoginIcon(),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.lens,size: 15,color: Colors.grey,),
-                    Icon(Icons.lens,size: 15,color: Colors.black,),
-                    Icon(Icons.lens,size: 15,color: Colors.grey,),
-                  ],
-                ),
-              ],
-            ),
-          ),
+          ],
         ),
-        Container(
-          color: Colors.cyanAccent.withOpacity(0.5),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('세 번째 페이지',style: TextStyle(fontSize: 50),),
-                LoginIcon(),
-                Row(
-                 mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.lens,size: 15,color: Colors.grey,),
-                    Icon(Icons.lens,size: 15,color: Colors.grey,),
-                    Icon(Icons.lens,size: 15,),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
 
-class LoginIcon extends StatelessWidget {
-  const LoginIcon({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        ElevatedButton.icon(
-          onPressed: () {
-            Get.to(NaverMapTest());
-          },
-          icon: Icon(
-            Icons.error,
-            color: Colors.black,
-          ),
-          label: Text(
-            "로그인 없이 이용하기",
-            style: TextStyle(fontSize: 15, color: Colors.black),
-          ),
-          style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
-        ),
-        ElevatedButton.icon(
-          onPressed: () {
-            Get.to(Login());
-          },
-          icon: Icon(
-            Icons.login,
-            color: Colors.black,
-          ),
-          label: Text(
-            "로그인 후 이용하기",
-            style: TextStyle(fontSize: 15, color: Colors.black),
-          ),
-          style: ElevatedButton.styleFrom(backgroundColor: Colors.lightGreen),
-        ),
-        SizedBox(height: 10,)
-      ],
-    );
-  }
-}
 

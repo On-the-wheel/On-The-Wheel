@@ -8,7 +8,9 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:naver_map_plugin/naver_map_plugin.dart';
+import 'package:onthewheelpractice/map/myPage/myPage_setting.dart';
 import 'package:onthewheelpractice/map/placeModal.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../Info.dart';
 import '../placeinfo.dart';
 import '../search_screen.dart';
@@ -601,10 +603,6 @@ class _NaverMapTestState extends State<NaverMapTest> {
                                       style: TextStyle(
                                           fontSize: 12,
                                           color: Color(0xFF968686))),
-                                  Text('회원정보수정',
-                                      style: TextStyle(
-                                          fontSize: 12,
-                                          color: Color(0xFF968686)))
                                 ],
                               )
                             ],
@@ -653,21 +651,15 @@ class _NaverMapTestState extends State<NaverMapTest> {
                       },
                     ),
                     ListTile(
-                      title: Text('FAQ'),
+                      title: Text('문의'),
                       onTap: () {
                         Get.to(MyPage_FAQ());
                       },
                     ),
                     ListTile(
-                      title: Text('문의'),
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                    ),
-                    ListTile(
                       title: Text('설정'),
                       onTap: () {
-                        Navigator.pop(context);
+                       Get.to(MyPage_Setting());
                       },
                     ),
                     ListTile(
@@ -706,14 +698,14 @@ class _NaverMapTestState extends State<NaverMapTest> {
                             actions: <Widget>[
                               TextButton(
                                 onPressed: () => Navigator.of(context).pop(),
-                                child: Text('취소'),
+                                child: Text('취소',style: TextStyle(color: Colors.black),),
                               ),
                               TextButton(
-                                onPressed: () {
-                                  setState(() {});
-                                  Navigator.of(context).pop();
+                                onPressed: () async {
+                                  final url = Uri.parse('tel:0542311117');
+                                  launchUrl(url);
                                 },
-                                child: Text('연락하기'),
+                                child: Text('연락하기',style: TextStyle(color: Colors.black),),
                               ),
                             ],
                           ),

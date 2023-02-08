@@ -1,10 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:onthewheelpractice/review.dart';
 
 import 'Home.dart';
 import 'loginPage.dart';
+
 
 class PlaceInfo extends StatefulWidget {
   const PlaceInfo({Key? key}) : super(key: key);
@@ -34,13 +37,11 @@ class FindPlace extends State<PlaceInfo> {
                       },
                       icon: Icon(Icons.arrow_back),
                     ),
-                    SizedBox(
-                      width: 5,
-                    ),
+
                     Text(
                       "한동대학교",
                       style:
-                      TextStyle(fontSize: 20, fontWeight: FontWeight.w200),
+                      TextStyle(fontSize: 22, fontWeight: FontWeight.w200),
                     ),
                     SizedBox(
                       width: 3,
@@ -56,7 +57,7 @@ class FindPlace extends State<PlaceInfo> {
                     Text(
                       "대학교",
                       style:
-                      TextStyle(fontSize: 10, fontWeight: FontWeight.w200),
+                      TextStyle(fontSize: 15, fontWeight: FontWeight.w200),
                     ),
                     Container(
                       width: 3,
@@ -67,7 +68,7 @@ class FindPlace extends State<PlaceInfo> {
                         // Get.off(Newplace());
                         Get.off(Login());
                       },
-                      icon: Icon(Icons.settings),
+                      icon: Icon(Icons.edit),
                     ),
                   ]),
                   Row(
@@ -77,7 +78,7 @@ class FindPlace extends State<PlaceInfo> {
                         height: 0,
                       ),
                       Container(
-                        width: 180,
+                        width: 200,
                         height: 1,
                         color: Colors.black,
                       ),
@@ -92,7 +93,7 @@ class FindPlace extends State<PlaceInfo> {
                       Text(
                         "경상북도 포항시 북구 흥해읍 한동로 558",
                         style: TextStyle(
-                            fontSize: 10, fontWeight: FontWeight.w200),
+                            fontSize: 12, fontWeight: FontWeight.w200),
                       ),
                     ],
                   ),
@@ -105,7 +106,7 @@ class FindPlace extends State<PlaceInfo> {
                       Text(
                         "100km     053-123-456",
                         style: TextStyle(
-                            fontSize: 10, fontWeight: FontWeight.w200),
+                            fontSize: 13, fontWeight: FontWeight.w200),
                       ),
                     ],
                   ),
@@ -143,122 +144,132 @@ class FindPlace extends State<PlaceInfo> {
             width: 400,
             height: 10,
           ),
-          Row(
+
+
+          Column(
             children: [
-              Container(
-                width: 10,
-                height: 20,
-              ),
-              Container(
-                width: 90,
-                height: 70,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('assets/images/icontoilet.png'),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Column(
+                    children: [
+                      Icon(
+                        Icons.door_front_door_outlined,
+                        color: Color(0xffbccf9b),
+                        size: 80,
+                      ),
+                      Text("문턱 있음"),
+                    ],
                   ),
-                ),
+                  Container(
+                    width: 10,
+                    height: 20,
+                  ),
+                  Column(
+                    children: [
+                      Icon(
+                        Icons.sensor_door_outlined,
+                        color: Color(0xffbccf9b),
+                        size: 80,
+                      ),
+                      Text("문턱 없음"),
+                    ],
+                  ),
+                  Container(
+                    width: 10,
+                    height: 20,
+                  ),
+                  Column(
+                    children: [
+                      Icon(
+                        Icons.local_parking,
+                        color: Color(0xffbccf9b),
+                        size: 80,
+                      ),
+                      Text("장애인 주차장"),
+                    ],
+                  ),
+                  Container(
+                    width: 10,
+                    height: 20,
+                  ),
+                  Column(
+                    children: [
+                      Icon(
+                        Icons.wc_outlined,
+                        color: Color(0xffbccf9b),
+                        size: 80,
+                      ),
+                      Text("장애인 화장실"),
+                    ],
+                  ),
+                ],
               ),
               Container(
                 width: 5,
-                height: 20,
-              ),
-              Container(
-                width: 90,
-                height: 70,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('assets/images/iconsign.png'),
-                  ),
-                ),
-              ),
-              Container(
-                width: 5,
-                height: 20,
-              ),
-              Container(
-                width: 90,
-                height: 70,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('assets/images/iconramp.png'),
-                  ),
-                ),
-              ),
-              Container(
-                width: 5,
-                height: 20,
-              ),
-              Container(
-                width: 90,
-                height: 70,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('assets/images/iconpark.png'),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          Container(
-            width: 5,
-            height: 10,
-          ),
-          Row(
-            children: [
-              Container(
-                width: 10,
                 height: 10,
               ),
-              Container(
-                width: 90,
-                height: 70,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('assets/images/iconelevator.png'),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Column(
+                    children: [
+                      Icon(
+                        Icons.elevator_outlined,
+                        color: Color(0xffbccf9b),
+                        size: 80,
+                      ),
+                      Text("엘리베이터"),
+                    ],
                   ),
-                ),
-              ),
-              Container(
-                width: 5,
-                height: 20,
-              ),
-              Container(
-                width: 90,
-                height: 70,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('assets/images/iconear.png'),
+                  Container(
+                    width: 10,
+                    height: 20,
                   ),
-                ),
-              ),
-              Container(
-                width: 5,
-                height: 20,
-              ),
-              Container(
-                width: 90,
-                height: 70,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('assets/images/icondoorsill.png'),
+                  Column(
+                    children: [
+                      Icon(
+                        Icons.signal_cellular_4_bar,
+                        color: Color(0xffbccf9b),
+                        size: 80,
+                      ),
+                      Text("경사로"),
+                    ],
                   ),
-                ),
-              ),
-              Container(
-                width: 5,
-                height: 20,
-              ),
-              Container(
-                width: 90,
-                height: 70,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('assets/images/icondog.png'),
+                  Container(
+                    width: 10,
+                    height: 20,
                   ),
-                ),
+                  Column(
+                    children: [
+                      Icon(
+                        Icons.looks_one,
+                        color: Color(0xffbccf9b),
+                        size: 80,
+                      ),
+                      Text("1층에 위치"),
+                    ],
+                  ),
+                  Container(
+                    width: 10,
+                    height: 20,
+                  ),
+                  Column(
+                    children: [
+                      Icon(
+                        Icons.pets,
+                        color: Color(0xffbccf9b),
+                        size: 80,
+                      ),
+                      Text("안내견 출입가능"),
+                    ],
+                  ),
+                ],
               ),
             ],
           ),
+
+
           Container(
             width: 5,
             height: 10,
@@ -385,8 +396,8 @@ class FindPlace extends State<PlaceInfo> {
           Row(
             children: [
               Container(
-                width: 8,
-                height: 1
+                  width: 8,
+                  height: 1
               ),
               Container(
                 width: 380,
@@ -414,36 +425,22 @@ class FindPlace extends State<PlaceInfo> {
                     width: 70,
                     height: 20,
                   ),
-                  IconButton(
-                    onPressed: () {},
-                    icon: Icon(Icons.star),
-                    color: Colors.yellow,
-                    iconSize: 35,
-                  ),
-                  IconButton(
-                    onPressed: () {},
-                    icon: Icon(Icons.star),
-                    color: Colors.yellow,
-                    iconSize: 35,
-                  ),
-                  IconButton(
-                    onPressed: () {},
-                    icon: Icon(Icons.star),
-                    color: Colors.yellow,
-                    iconSize: 35,
-                  ),
-                  IconButton(
-                    onPressed: () {},
-                    icon: Icon(Icons.star),
-                    color: Colors.yellow,
-                    iconSize: 35,
-                  ),
-                  IconButton(
-                    onPressed: () {},
-                    icon: Icon(Icons.star),
-                    color: Colors.yellow,
-                    iconSize: 35,
-                  ),
+                  RatingBar.builder(
+                    initialRating: 0,
+                    minRating: 0.5,
+                    direction: Axis.horizontal,
+                    allowHalfRating: true,
+                    itemCount: 5,
+                    itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
+                    itemBuilder: (context, _) => Icon(
+                      Icons.star,
+                      color: Colors.amber,
+                    ),
+                    onRatingUpdate: (rating) {
+                      Get.to(Review(count: rating,));
+                    },
+                  )
+
                 ],
               ),
             ],
@@ -467,16 +464,15 @@ class FindPlace extends State<PlaceInfo> {
           ),
           Row(
             children: [
-              Container(
-                width: 10,
-                height: 15,
-              ),
 
 
               Container(
-                width: 375,
-                height: 90,
+                margin: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                padding: EdgeInsets.fromLTRB(10,0,15,15),
+                // width: 375,
+                // height: 90,
                 decoration:  BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
                   border: Border.all(),
                 ),
                 child: Column(
@@ -485,7 +481,7 @@ class FindPlace extends State<PlaceInfo> {
                       children: [
                         Icon(
                           Icons.perm_identity_sharp,
-                          color: Colors.green,
+                          color: Color(0xffbccf9b),
                           size: 40,
                         ),
                         Text("김민영",
@@ -517,98 +513,22 @@ class FindPlace extends State<PlaceInfo> {
                         ),
                         Icon(
                           Icons.star,
-                          color: Colors.yellow,
+                          color: Color(0xffbccf9b),
                           size: 20,
                         ),
                         Icon(
                           Icons.star,
-                          color: Colors.yellow,
+                          color: Color(0xffbccf9b),
                           size: 20,
                         ),
                         Icon(
                           Icons.star,
-                          color: Colors.yellow,
+                          color: Color(0xffbccf9b),
                           size: 20,
                         ),
                         Icon(
                           Icons.star,
-                          color: Colors.yellow,
-                          size: 20,
-                        ),
-                        Icon(
-                          Icons.star,
-                          color: Colors.grey,
-                          size: 20,
-                        ),
-
-
-
-                      ],
-                    ),
-                    Text("이동이 편리해요.사람들이 친절하고 다음에도 ...."),
-                  ],
-                ),
-              ),
-              Container(
-                width: 375,
-                height: 90,
-                decoration:  BoxDecoration(
-                  border: Border.all(),
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.perm_identity_sharp,
-                          color: Colors.green,
-                          size: 40,
-                        ),
-                        Text("김민영",
-                            style: TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.w200)),
-                        Container(
-                          width: 15,
-                          height: 1,
-                        ),
-                        Container(
-                          width: 1,
-                          height: 25,
-                          color: Colors.black,
-                        ),
-                        Container(
-                          width: 15,
-                          height: 1,
-                        ),
-                        Text(
-                          "2022. 1.31",
-                          style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w200,
-                              color: Colors.grey),
-                        ),
-                        Container(
-                          width: 55,
-                          height: 1,
-                        ),
-                        Icon(
-                          Icons.star,
-                          color: Colors.yellow,
-                          size: 20,
-                        ),
-                        Icon(
-                          Icons.star,
-                          color: Colors.yellow,
-                          size: 20,
-                        ),
-                        Icon(
-                          Icons.star,
-                          color: Colors.yellow,
-                          size: 20,
-                        ),
-                        Icon(
-                          Icons.star,
-                          color: Colors.yellow,
+                          color: Color(0xffbccf9b),
                           size: 20,
                         ),
                         Icon(
@@ -616,8 +536,6 @@ class FindPlace extends State<PlaceInfo> {
                           color: Colors.grey,
                           size: 20,
                         ),
-
-
 
                       ],
                     ),
@@ -633,4 +551,5 @@ class FindPlace extends State<PlaceInfo> {
       ),
     );
   }
+
 }
