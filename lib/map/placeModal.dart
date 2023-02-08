@@ -14,6 +14,7 @@ class placeModal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
+
       padding: const EdgeInsets.fromLTRB(20, 0, 10, 10),
       child: ListView(
         children: [
@@ -143,6 +144,7 @@ class placeModal extends StatelessWidget {
             ),
           ),
           Divider(thickness: 1),
+
           iconMaker(info, context)
         ],
       ),
@@ -156,16 +158,19 @@ class placeModal extends StatelessWidget {
     return Container(
       width: getScreenWidth(context),
       height: getScreenHeight(context) * 0.05,
+
       child:
           ListView(scrollDirection: Axis.horizontal, children: getList(result)),
     );
   }
 
   List<Widget> getList(List<String> result) {
+
     List<Widget> childs = [];
     for (int i = 0; i < result.length; i++) {
       print(result[i]);
       if (result[i] == "문턱 없음") {
+
         childs.add(Icon(
           Icons.sensor_door_outlined,
           size: 35,
@@ -204,4 +209,5 @@ class placeModal extends StatelessWidget {
   Container makeIcon(IconData icon, String name) {
     return Container();
   }
+
 }

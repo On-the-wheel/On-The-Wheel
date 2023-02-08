@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
@@ -8,6 +9,8 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:naver_map_plugin/naver_map_plugin.dart';
 import 'package:onthewheelpractice/map/placeModal.dart';
+import '../Info.dart';
+import '../placeinfo.dart';
 import '../search_screen.dart';
 import '../size.dart';
 import 'myPage/myPage_FAQ.dart';
@@ -19,6 +22,11 @@ List<Marker> rest_marker = [];
 List<Marker> bokji_marker = [];
 List<Marker> mart_marker = [];
 List<Marker> all_marker = [];
+int count = 0;
+
+late OverlayImage office_image;//복지시설 아이콘
+late OverlayImage mart_image;//마트 아이콘
+late OverlayImage restaurant_image;// 레스토랑 아이콘
 
 class NaverMapTest extends StatefulWidget {
   @override
@@ -34,52 +42,90 @@ class _NaverMapTestState extends State<NaverMapTest> {
   late double lat=36.08052391749029;
   late double lng=129.39873537642814;
   late Position position;
-  int count =0;
-
-  late OverlayImage office_image;//복지시설 아이콘
-  late OverlayImage mart_image;//마트 아이콘
-  late OverlayImage restaurant_image;// 레스토랑 아이콘
 
   Future getCurrentLocation() async {
     position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
+    bool serviceEnabled;
+    LocationPermission permission;
+
+// Test if location services are enabled.
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // Location services are not enabled don't continue
+      // accessing the position and request users of the
+      // App to enable the location services.
+      return;
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.deniedForever) {
+        // Permissions are denied forever, handle appropriately.
+        return;
+      }
+
+      if (permission == LocationPermission.denied) {
+        // Permissions are denied, next time you could try
+        // requesting permissions again (this is also where
+        // Android's shouldShowRequestPermissionRationale
+        // returned true. According to Android guidelines
+        // your App should show an explanatory UI now.
+        return;
+      }
+    }
+
+// When we reach here, permissions are granted and we can
+// continue accessing the position of the device.
+    position = await Geolocator.getCurrentPosition();
   }
 
   Future getImage() async {
-    office_image = await OverlayImage.fromAssetImage(assetName: "assets/images/office.png", context: context);
-    mart_image = await OverlayImage.fromAssetImage(assetName: "assets/images/mart.png", context: context);
-    restaurant_image = await OverlayImage.fromAssetImage(assetName: "assets/images/restaurant.png", context: context);
+    office_image = await OverlayImage.fromAssetImage(
+        assetName: "assets/images/office.png", context: context);
+    mart_image = await OverlayImage.fromAssetImage(
+        assetName: "assets/images/mart.png", context: context);
+    restaurant_image = await OverlayImage.fromAssetImage(
+        assetName: "assets/images/restaurant.png", context: context);
     // else if(name == "마트") test_image = await OverlayImage.fromAssetImage(assetName: "assets/images/mart.png", context: context);
+  }
+
+  Future<Position> determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return Future.error('Location services are disabled.');
+    }
+
+    permission = await Geolocator.checkPermission();
+    permission = await Geolocator.requestPermission();
+
+    if (permission == LocationPermission.denied) {
+      return Future.error('Location permissions are denied');
+    }
+
+
+    if (permission == LocationPermission.deniedForever) {
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
+    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.low);
+    print(position);
+
+    return await Geolocator.getCurrentPosition();
   }
 
 
   @override
   Widget build(BuildContext context) {
-
-    if(count ==0){
-      getImage();
-      test_marker = all_marker;
-      count ++;
-      print("실행");
-    }
     Firebase.initializeApp();
-
     all_marker.clear();
     bokji_marker.clear();
     mart_marker.clear();
     rest_marker.clear();
-    NaverMap naverMap = NaverMap(
-      initialCameraPosition: CameraPosition(target: LatLng(lat,lng),),
-      onCameraChange: (latLng, reason, isAnimated){
-        lat = latLng.latitude;
-        lng = latLng.longitude;
-        print(lat);
-        print(lng);
-      },
-      onMapCreated: onMapCreated,
-      mapType: _mapType,
-      markers: test_marker,
-    );
 
     return StreamBuilder(
         stream: FirebaseFirestore.instance
@@ -88,12 +134,20 @@ class _NaverMapTestState extends State<NaverMapTest> {
             .snapshots(),
         builder: (BuildContext context,
             AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
+
+          if (count == 0) {
+            getImage();
+            print("클릭");
+            test_marker = all_marker;
+            count++;
+          }
+
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
               child: CircularProgressIndicator(),
             );
           } else {
-            for (int i = 0; i < 3; i++) {
+            for (int i = 0; i < snapshot.data!.docs.length; i++) {
               // snapshot.data!.docs.length
               var places = snapshot.data!.docs[i];
 
@@ -104,8 +158,6 @@ class _NaverMapTestState extends State<NaverMapTest> {
               var longitude = places.get('longitude');
               var category = places.get('category');
               print(name + " : " + info + "\n");
-
-
 
               if (category == "복지시설") {
                 bokji_marker.add(makeMarker(name, category, location, latitude,
@@ -125,19 +177,19 @@ class _NaverMapTestState extends State<NaverMapTest> {
               }
             }
 
+
             return Scaffold(
               key: _scaffoldKey,
               body: SafeArea(
                 child: Stack(
                   children: <Widget>[
                     Container(
-                      child: naverMap
-    // NaverMap(
-    //                     initialCameraPosition: CameraPosition(target: LatLng(lat,lng)),
-    //                     onMapCreated: onMapCreated,
-    //                     mapType: _mapType,
-    //                     markers: all_marker,
-    //                   ),
+                      child: NaverMap(
+                        initialCameraPosition: CameraPosition(target: LatLng(lat,lng)),
+                        onMapCreated: onMapCreated,
+                        mapType: _mapType,
+                        markers:  test_marker,
+                      ),
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(4, 6, 0, 0),
@@ -158,20 +210,20 @@ class _NaverMapTestState extends State<NaverMapTest> {
                           child: Row(children: <Widget>[
                             Expanded(
                                 child: TextField(
-                              onTap: () {
-                                Get.to(SearchScreen());
-                                FocusManager.instance.primaryFocus?.unfocus();
-                              },
-                              decoration: InputDecoration(
-                                prefixIcon: Icon(
-                                  Icons.search,
-                                  color: Colors.black,
-                                  size: 20,
-                                ),
-                                hintText: '검색',
-                                labelStyle: TextStyle(color: Colors.black),
-                              ),
-                            )),
+                                  onTap: () {
+                                    Get.to(SearchScreen());
+                                    FocusManager.instance.primaryFocus?.unfocus();
+                                  },
+                                  decoration: InputDecoration(
+                                    prefixIcon: Icon(
+                                      Icons.search,
+                                      color: Colors.black,
+                                      size: 20,
+                                    ),
+                                    hintText: '검색',
+                                    labelStyle: TextStyle(color: Colors.black),
+                                  ),
+                                )),
                           ]),
                         ),
                       ),
@@ -188,7 +240,8 @@ class _NaverMapTestState extends State<NaverMapTest> {
                         ],
 
                       ),),
-                    Padding(padding: const EdgeInsets.fromLTRB(10, 60, 0, 0),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(10, 60, 0, 0),
                       child: Column(
                         children: [
                           Container(
@@ -196,131 +249,332 @@ class _NaverMapTestState extends State<NaverMapTest> {
                               scrollDirection: Axis.horizontal,
                               child: Row(
                                 children: [
-
-                                  OutlinedButton(onPressed: (){
-                                    print("클릭");
-                                    test_marker = bokji_marker;
-                                    initState();
-                                  }, child: Text("복지시설"),
-                                    style: ElevatedButton.styleFrom(
-
-                                      shape: RoundedRectangleBorder(	//모서리를 둥글게
-                                          borderRadius: BorderRadius.circular(15)),
-                                      side: BorderSide(
-                                        color: Colors.lightGreen,
+                                  GestureDetector(
+                                    child: Row(children: [
+                                      OutlinedButton.icon(
+                                        onPressed: () {
+                                          test_marker = rest_marker;
+                                          setState(() {});
+                                        },
+                                        icon: Icon(
+                                            Icons.restaurant,
+                                            size: 18),
+                                        label: Text("음식점 & 카페"),
+                                        style: ElevatedButton.styleFrom(
+                                          shape: RoundedRectangleBorder(
+                                            //모서리를 둥글게
+                                              borderRadius:
+                                              BorderRadius.circular(15)),
+                                          side: BorderSide(
+                                            color: Colors.lightGreen,
+                                          ),
+                                          textStyle: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                          foregroundColor: Colors.lightGreen,
+                                          backgroundColor: Colors.white,
+                                        ),
                                       ),
-                                      textStyle: TextStyle(
-                                        fontWeight: FontWeight.w600,
-
+                                      SizedBox(
+                                        width: 10,
                                       ),
-                                      foregroundColor: Colors.lightGreen,
-                                      backgroundColor: Colors.white,
+                                    ]),
+                                    onTap: () {},
 
 
-                                    ),),
-                                  SizedBox(width: 10,),
-                                  OutlinedButton(onPressed: (){}, child: Text("  카페 "),style: ElevatedButton.styleFrom(
-                                    shape: RoundedRectangleBorder(	//모서리를 둥글게
-                                        borderRadius: BorderRadius.circular(15)),   textStyle: TextStyle(
-                                    fontWeight: FontWeight.w600,
                                   ),
-                                    foregroundColor: Colors.white,
-                                    backgroundColor: Colors.lightGreen,),
-                                  ),
-                                  SizedBox(width: 10,),
-                                  OutlinedButton(onPressed: (){}, child: Text("  병원 "),style: ElevatedButton.styleFrom(
-                                    shape: RoundedRectangleBorder(	//모서리를 둥글게
-                                        borderRadius: BorderRadius.circular(15)),   textStyle: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                    foregroundColor: Colors.white,
-                                    backgroundColor: Colors.lightGreen,),
-                                  ),
-                                  SizedBox(width: 10,),
-                                  OutlinedButton(onPressed: (){}, child: Text("복지 시설"),style: ElevatedButton.styleFrom(
-                                    shape: RoundedRectangleBorder(	//모서리를 둥글게
-                                        borderRadius: BorderRadius.circular(15)),   textStyle: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                    foregroundColor: Colors.white,
-                                    backgroundColor: Colors.lightGreen,),
-                                  ),
-                                  SizedBox(width: 10,),
-                                  OutlinedButton(onPressed: (){}, child: Text("편의 시설"),style: ElevatedButton.styleFrom(
-                                    shape: RoundedRectangleBorder(	//모서리를 둥글게
-                                        borderRadius: BorderRadius.circular(15)),   textStyle: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                    foregroundColor: Colors.white,
-                                    backgroundColor: Colors.lightGreen,),
-                                  ),
-                                  SizedBox(width: 10,),
-                                  OutlinedButton(onPressed: (){}, child: Text(" 화장실 "),style: ElevatedButton.styleFrom(
-                                    shape: RoundedRectangleBorder(	//모서리를 둥글게
-                                        borderRadius: BorderRadius.circular(15)),   textStyle: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                    side: BorderSide(
-                                      color: Colors.lightGreen,
-                                    ),
-                                    foregroundColor: Color(0xffBCCF9B),
-                                    backgroundColor: Colors.white,),
-                                  ),
-                                  SizedBox(width: 10,),
-                                  OutlinedButton(onPressed: (){}, child: Text(" 마트 "),style: ElevatedButton.styleFrom(
-                                    shape: RoundedRectangleBorder(	//모서리를 둥글게
-                                        borderRadius: BorderRadius.circular(15)),   textStyle: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                    foregroundColor: Color(0xffBCCF9B),
-                                    backgroundColor: Colors.white,),
-                                  ),
-                                  SizedBox(width: 10,),
-                                  OutlinedButton(onPressed: (){}, child: Text("교육시설"),style: ElevatedButton.styleFrom(
-                                    shape: RoundedRectangleBorder(	//모서리를 둥글게
-                                        borderRadius: BorderRadius.circular(15)),   textStyle: TextStyle(
-                                    fontWeight: FontWeight.w600,
+                                  GestureDetector(
+                                    child: Row(children: [
+                                      OutlinedButton.icon(
+                                        onPressed: () {
+                                          // // test_marker = bokji_marker;
+                                          setState(() {});
+                                        },
+                                        icon: Icon(
+                                            Icons.medication,
+                                            size: 18),
+                                        label: Text("병원"),
+                                        style: ElevatedButton.styleFrom(
+                                          shape: RoundedRectangleBorder(
+                                            //모서리를 둥글게
+                                              borderRadius:
+                                              BorderRadius.circular(15)),
+                                          side: BorderSide(
+                                            color: Colors.lightGreen,
+                                          ),
+                                          textStyle: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                          foregroundColor: Colors.lightGreen,
+                                          backgroundColor: Colors.white,
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 10,
+                                      ),
+                                    ]),
+                                    onTap: () {},
+
 
                                   ),
-                                    foregroundColor: Colors.black,
-                                    backgroundColor: Colors.white,),
+                                  GestureDetector(
+                                    child: Row(children: [
+                                      OutlinedButton.icon(
+                                        onPressed: () {
+                                          test_marker = bokji_marker;
+                                          setState(() {});
+                                        },
+                                        icon: Icon(
+                                            Icons.account_balance_outlined,
+                                            size: 18),
+                                        label: Text("복지시설"),
+                                        style: ElevatedButton.styleFrom(
+                                          shape: RoundedRectangleBorder(
+                                            //모서리를 둥글게
+                                              borderRadius:
+                                              BorderRadius.circular(15)),
+                                          side: BorderSide(
+                                            color: Colors.lightGreen,
+                                          ),
+                                          textStyle: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                          foregroundColor: Colors.lightGreen,
+                                          backgroundColor: Colors.white,
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 10,
+                                      ),
+                                    ]),
+                                    onTap: () {},
+
 
                                   ),
-                                  SizedBox(width: 10,),
-                                  OutlinedButton(onPressed: (){}, child: Text("숙박시설"),style: ElevatedButton.styleFrom(
-                                    shape: RoundedRectangleBorder(	//모서리를 둥글게
-                                        borderRadius: BorderRadius.circular(15)),   textStyle: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                    foregroundColor: Colors.white,
-                                    backgroundColor: Color(0xffBCCF9B),),
-                                  ),
-                                  SizedBox(width: 10,),
-                                  OutlinedButton(onPressed: (){}, child: Text(" 기타 "),style: ElevatedButton.styleFrom(
-                                    shape: RoundedRectangleBorder(	//모서리를 둥글게
-                                        borderRadius: BorderRadius.circular(15)),   textStyle: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                    foregroundColor: Colors.white,
-                                    backgroundColor: Color(0xffBCCF9B),),
-                                  ),
+                                  GestureDetector(
+                                    child: Row(children: [
+                                      OutlinedButton.icon(
+                                        onPressed: () {
+                                          // // test_marker = bokji_marker;
+                                          setState(() {});
+                                        },
+                                        icon: Icon(
+                                            Icons.aspect_ratio_outlined,
+                                            size: 18),
+                                        label: Text("편의시설"),
+                                        style: ElevatedButton.styleFrom(
+                                          shape: RoundedRectangleBorder(
+                                            //모서리를 둥글게
+                                              borderRadius:
+                                              BorderRadius.circular(15)),
+                                          side: BorderSide(
+                                            color: Colors.lightGreen,
+                                          ),
+                                          textStyle: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                          foregroundColor: Colors.lightGreen,
+                                          backgroundColor: Colors.white,
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 10,
+                                      ),
+                                    ]),
+                                    onTap: () {},
 
+
+                                  ),
+                                  GestureDetector(
+                                    child: Row(children: [
+                                      OutlinedButton.icon(
+                                        onPressed: () {
+                                          // test_marker = bokji_marker;
+                                          setState(() {});
+                                        },
+                                        icon: Icon(
+                                            Icons.wc_outlined,
+                                            size: 18),
+                                        label: Text("화장실"),
+                                        style: ElevatedButton.styleFrom(
+                                          shape: RoundedRectangleBorder(
+                                            //모서리를 둥글게
+                                              borderRadius:
+                                              BorderRadius.circular(15)),
+                                          side: BorderSide(
+                                            color: Colors.lightGreen,
+                                          ),
+                                          textStyle: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                          foregroundColor: Colors.lightGreen,
+                                          backgroundColor: Colors.white,
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 10,
+                                      ),
+                                    ]),
+                                    onTap: () {},
+
+
+                                  ),
+                                  GestureDetector(
+                                    child: Row(children: [
+                                      OutlinedButton.icon(
+                                        onPressed: () {
+                                          test_marker = mart_marker;
+                                          // setState(() {});
+                                        },
+                                        icon: Icon(
+                                            Icons.shopping_cart_outlined,
+                                            size: 18),
+                                        label: Text("마트"),
+                                        style: ElevatedButton.styleFrom(
+                                          shape: RoundedRectangleBorder(
+                                            //모서리를 둥글게
+                                              borderRadius:
+                                              BorderRadius.circular(15)),
+                                          side: BorderSide(
+                                            color: Colors.lightGreen,
+                                          ),
+                                          textStyle: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                          foregroundColor: Colors.lightGreen,
+                                          backgroundColor: Colors.white,
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 10,
+                                      ),
+                                    ]),
+                                    onTap: () {},
+
+
+                                  ),
+                                  GestureDetector(
+                                    child: Row(children: [
+                                      OutlinedButton.icon(
+                                        onPressed: () {
+                                          // // test_marker = bokji_marker;
+                                          // setState(() {});
+                                        },
+                                        icon: Icon(
+                                            Icons.menu_book_outlined,
+                                            size: 18),
+                                        label: Text("교육시설"),
+                                        style: ElevatedButton.styleFrom(
+                                          shape: RoundedRectangleBorder(
+                                            //모서리를 둥글게
+                                              borderRadius:
+                                              BorderRadius.circular(15)),
+                                          side: BorderSide(
+                                            color: Colors.lightGreen,
+                                          ),
+                                          textStyle: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                          foregroundColor: Colors.lightGreen,
+                                          backgroundColor: Colors.white,
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 10,
+                                      ),
+                                    ]),
+                                    onTap: () {},
+
+
+                                  ),
+                                  GestureDetector(
+                                    child: Row(children: [
+                                      OutlinedButton.icon(
+                                        onPressed: () {
+                                          // // test_marker = bokji_marker;
+                                          // setState(() {});
+                                        },
+                                        icon: Icon(
+                                            Icons.bed_outlined,
+                                            size: 18),
+                                        label: Text("숙박시설"),
+                                        style: ElevatedButton.styleFrom(
+                                          shape: RoundedRectangleBorder(
+                                            //모서리를 둥글게
+                                              borderRadius:
+                                              BorderRadius.circular(15)),
+                                          side: BorderSide(
+                                            color: Colors.lightGreen,
+                                          ),
+                                          textStyle: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                          foregroundColor: Colors.lightGreen,
+                                          backgroundColor: Colors.white,
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 10,
+                                      ),
+                                    ]),
+                                    onTap: () {},
+
+
+                                  ),
+                                  GestureDetector(
+                                    child: Row(children: [
+                                      OutlinedButton.icon(
+                                        onPressed: () {
+                                          // // test_marker = bokji_marker;
+                                          // setState(() {});
+                                        },
+                                        icon: Icon(
+                                            Icons.more_outlined,
+                                            size: 18),
+                                        label: Text("기타"),
+                                        style: ElevatedButton.styleFrom(
+                                          shape: RoundedRectangleBorder(
+                                            //모서리를 둥글게
+                                              borderRadius:
+                                              BorderRadius.circular(15)),
+                                          side: BorderSide(
+                                            color: Colors.lightGreen,
+                                          ),
+                                          textStyle: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                          foregroundColor: Colors.lightGreen,
+                                          backgroundColor: Colors.white,
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 10,
+                                      ),
+                                    ]),
+                                    onTap: () {},
+
+
+                                  ),
+                                  // _mainButton( Icons.restaurant, "음식점 & 카페"),
+                                  // _mainButton(Icons.medication, "병원"),
+                                  // _mainButton(Icons.account_balance_outlined, "복지시설", context),
+                                  // _mainButton(Icons.aspect_ratio_outlined, "편의시설"),
+                                  // _mainButton(Icons.wc_outlined, "화장실"),
+                                  // _mainButton(Icons.shopping_cart_outlined,"마트"),
+                                  // _mainButton(Icons.menu_book_outlined, "교육시설"),
+                                  // _mainButton(Icons.bed_outlined,"숙박시설"),
+                                  // _mainButton(Icons.more_outlined, "기타"),
                                 ],
                               ),
                             ),
-
                           )
                         ],
                       ),
-
                     )
-
                   ],
-
                 ),
-
-
               ),
+
               bottomNavigationBar: BottomAppBar(),
               drawer: Drawer(
                 child: ListView(
@@ -469,7 +723,7 @@ class _NaverMapTestState extends State<NaverMapTest> {
                     ),
                   ),
                   Align(
-                      //현재 위치 아이콘
+                    //현재 위치 아이콘
                       alignment: Alignment.bottomRight,
                       child: FloatingActionButton(
                         onPressed: () async {
@@ -495,37 +749,27 @@ class _NaverMapTestState extends State<NaverMapTest> {
   }
 
   Marker makeMarker(String name, String category, String location,
-      double latitude, double longitude, String info, Color color, OverlayImage test_image)  {
-    OverlayImage testImage;
-
-    // if(category == "복지시설") testImage = office_image;
-    // else if(category == "마트") testImage = mart_image;
-    // else if(category == "식당") testImage = restaurant_image;
-
+      double latitude, double longitude, String info, Color color, OverlayImage test_image) {
     return Marker(
       // icon: OverlayImage(AssetImage('assets/images/hgu.png'), AssetBundleImageKey(null, null, null)),
       // icon: OverlayImage(Image( image: AssetImage('assets/images/hgu.png'),)),
-
-        icon:test_image,
-
+        icon: test_image,
         onMarkerTab: (marker, iconSize) {
           showModalBottomSheet(
               isScrollControlled: true,
               shape: RoundedRectangleBorder(
                   borderRadius:
-                      BorderRadius.vertical(top: Radius.circular(10))),
+                  BorderRadius.vertical(top: Radius.circular(10))),
               context: context,
               builder: (context) => Container(
-                    height: getScreenHeight(context) * 0.35,
-                    child: placeModal(name, category, location, info),
-                  ));
+                height: getScreenHeight(context) * 0.3,
+                child: placeModal(name, category, location, info),
+              ));
         },
         width: 40,
         height: 50,
         position: LatLng(latitude, longitude),
         markerId: name,
-        );
+    );
   }
-
-
 }
