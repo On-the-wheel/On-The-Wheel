@@ -1,8 +1,8 @@
-# onthewheelpractice
+# On-The-Wheel Project
 
-A new Flutter project.
 
-## Getting Started
+
+## 휠체어 이용자들을 위한 서비스 앱
 
 This project is a starting point for a Flutter application.
 
