@@ -1,6 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:onthewheelpractice/map/myPage/version/Version%2023.%202.%201..dart';
 import 'package:onthewheelpractice/size.dart';
+
+import 'notice_page.dart';
+
+
 
 class MyPage_notice extends StatelessWidget {
   const MyPage_notice({Key? key}) : super(key: key);
@@ -22,7 +29,9 @@ class MyPage_notice extends StatelessWidget {
               SizedBox(
                 height: 50,
                 width: getScreenWidth(context),
-                child: ElevatedButton(onPressed: (){}, child: Row(
+                child: ElevatedButton(onPressed: (){
+                  Get.to(Notice_1());
+                }, child: Row(
                   children: [
                     Text('On The Wheel 서비스 시작',style: TextStyle(fontSize: 20),),
                     SizedBox(width: 50,),

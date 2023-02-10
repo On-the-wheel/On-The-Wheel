@@ -18,6 +18,7 @@ import '../searchfilter.dart';
 import '../size.dart';
 import 'myPage/myPage_FAQ.dart';
 import 'myPage/myPage_notice.dart';
+import 'myPage/version/Version 23. 2. 1..dart';
 import 'newPlace.dart';
 
 List<Marker> test_marker = [];
@@ -183,8 +184,8 @@ class _NaverMapTestState extends State<NaverMapTest> {
               print(name + " : " + info + "\n");
 
               if (category == "복지시설") {
-                Marker marker = makeMarker(context, name, category, location, latitude,
-                    longitude, info, Colors.blueAccent, office_image);
+                Marker marker = makeMarker(context, name, category, location,
+                    latitude, longitude, info, Colors.blueAccent, office_image);
                 bokji_marker.add(marker);
                 all_marker.add(marker);
 
@@ -212,8 +213,8 @@ class _NaverMapTestState extends State<NaverMapTest> {
                   }
                 }
               } else if (category == "마트") {
-                Marker marker = makeMarker(context, name, category, location, latitude,
-                    longitude, info, Colors.redAccent, mart_image);
+                Marker marker = makeMarker(context, name, category, location,
+                    latitude, longitude, info, Colors.redAccent, mart_image);
                 mart_marker.add(marker);
                 all_marker.add(marker);
                 if (!(doorsill || runway || elevator || parking || toilet)) {
@@ -221,7 +222,9 @@ class _NaverMapTestState extends State<NaverMapTest> {
                 } else {
                   bool print = false;
                   if (doorsill) {
-                    info.contains("주출입구 높이차이 제거") ? print = true : print = false;
+                    info.contains("주출입구 높이차이 제거")
+                        ? print = true
+                        : print = false;
                   }
                   if (runway) {
                     info.contains("주출입구 접근로") ? print = true : print = false;
@@ -240,8 +243,16 @@ class _NaverMapTestState extends State<NaverMapTest> {
                   }
                 }
               } else if (category == "식당") {
-                Marker marker = makeMarker(context, name, category, location, latitude,
-                    longitude, info, Colors.purpleAccent, restaurant_image);
+                Marker marker = makeMarker(
+                    context,
+                    name,
+                    category,
+                    location,
+                    latitude,
+                    longitude,
+                    info,
+                    Colors.purpleAccent,
+                    restaurant_image);
                 rest_marker.add(marker);
                 all_marker.add(marker);
                 if (!(doorsill || runway || elevator || parking || toilet)) {
@@ -736,6 +747,13 @@ class _NaverMapTestState extends State<NaverMapTest> {
                         Navigator.pop(context);
                       },
                     ),
+                    ListTile(
+                      hoverColor: Color(0xffBCCF9B),
+                      title: Text('버전 23. 2. 1.'),
+                      onTap: () {
+                        Get.to(Version23_2_1());
+                      },
+                    )
                   ],
                 ),
               ),

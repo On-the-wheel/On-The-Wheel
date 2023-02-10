@@ -27,8 +27,8 @@ class _State extends State<Place_creat> {
     return Scaffold(
         appBar: AppBar(
             backgroundColor: Colors.white,
+            automaticallyImplyLeading: false,
             centerTitle: true,
-            leading: Icon(Icons.place_outlined, color: Colors.black),
             title: const Text(
                 '장소등록',
                 style: TextStyle(

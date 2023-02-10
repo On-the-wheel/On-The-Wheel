@@ -512,7 +512,7 @@ class _SignUpState extends State<SignUp> {
                                     }
                                     await _auth.verifyPhoneNumber(
                                         timeout: const Duration(seconds: 120),
-                                        phoneNumber: "+8210"+phoneNumberController1.text.trim()+phoneNumberController2.text.trim(),
+                                        phoneNumber: "+8210"+phoneNumberController1.text+phoneNumberController2.text,
                                         verificationCompleted: (PhoneAuthCredential credential) async{
                                           print('인증 문자 수신');
                                         },

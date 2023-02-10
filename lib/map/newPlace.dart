@@ -172,8 +172,6 @@ class _NewplaceState extends State<Newplace> {
                     ),
                   ),
                 ),
-
-                SizedBox(height: 10,)
               ],
             ),
           ),
