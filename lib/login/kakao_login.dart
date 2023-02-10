@@ -13,7 +13,7 @@ class KakaoLogin implements SocialLogin {
       if (isInstalled) {
         try {
           await UserApi.instance.loginWithKakaoTalk();
-          Get.to(()=>NaverMapTest());
+          Get.to(()=>NaverMapTest(doorsill: false, runway: false, elevator: false, parking: false, toilet: false,));
           print("카카오 로그인 앱으로 성공");
           return true;
         } catch (e) {
@@ -23,7 +23,7 @@ class KakaoLogin implements SocialLogin {
       } else {
         try {
           await UserApi.instance.loginWithKakaoAccount();
-          Get.to(()=>NaverMapTest());
+          Get.to(()=>NaverMapTest(doorsill: false, runway: false, elevator: false, parking: false, toilet: false,));
           print("카카오 로그인 웹으로 성공");
           return true;
         } catch (e) {

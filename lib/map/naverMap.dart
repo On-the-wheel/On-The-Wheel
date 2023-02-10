@@ -14,6 +14,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../Info.dart';
 import '../placeinfo.dart';
 import '../search_screen.dart';
+import '../searchfilter.dart';
 import '../size.dart';
 import 'myPage/myPage_FAQ.dart';
 import 'myPage/myPage_notice.dart';
@@ -24,13 +25,29 @@ List<Marker> rest_marker = [];
 List<Marker> bokji_marker = [];
 List<Marker> mart_marker = [];
 List<Marker> all_marker = [];
+List<Marker> print_marker = [];
 int count = 0;
 
-late OverlayImage office_image;//복지시설 아이콘
-late OverlayImage mart_image;//마트 아이콘
-late OverlayImage restaurant_image;// 레스토랑 아이콘
+late OverlayImage office_image; //복지시설 아이콘
+late OverlayImage mart_image; //마트 아이콘
+late OverlayImage restaurant_image; // 레스토랑 아이콘
 
 class NaverMapTest extends StatefulWidget {
+  NaverMapTest(
+      {Key? key,
+      required this.doorsill,
+      required this.runway,
+      required this.elevator,
+      required this.parking,
+      required this.toilet})
+      : super(key: key);
+
+  bool doorsill;
+  bool runway;
+  bool elevator;
+  bool parking;
+  bool toilet;
+
   @override
   _NaverMapTestState createState() => _NaverMapTestState();
 }
@@ -41,8 +58,8 @@ class _NaverMapTestState extends State<NaverMapTest> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final imageUrl1 =
       'https://s3-alpha-sig.figma.com/img/7e62/21e6/b66f076abc8c42787d3343a22987d8be?Expires=1676246400&Signature=UDEA3OVmYCYzhlV2QFwfb4HIA2DUI~8byJ2YtkSdYXsMDDxzv9zyaVjtDgspv0HS8H0bKq52aLSu23dQ1JCTJ0y7vioLlWuDPBIlrxMKY55rax-p-dZrI6M8au5clCPzeqFTcCd4217pPIo7C-tK61eBdkgKuyKCdh7q5yetV7AKuc2Jn85MqjoC-2tB4nMsStGqAAwUYvTUnyt56DfExgLtxGZI0~EAiBCY44BzQmdh6M6o0ZDmKr5UPoRzfQpCPuvjks9YBTTOijmFNQ36D7Ypeu9-PnuB3nhsSu8cEcY28JTIEQIq6qZ~IsiVi4bKLViz3tYOJHt54kzpFP5fxA__&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4';
-  late double lat=36.08052391749029;
-  late double lng=129.39873537642814;
+  late double lat = 36.08052391749029;
+  late double lng = 129.39873537642814;
   late Position position;
 
   Future getCurrentLocation() async {
@@ -109,20 +126,25 @@ class _NaverMapTestState extends State<NaverMapTest> {
       return Future.error('Location permissions are denied');
     }
 
-
     if (permission == LocationPermission.deniedForever) {
       return Future.error(
           'Location permissions are permanently denied, we cannot request permissions.');
     }
-    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.low);
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.low);
     print(position);
 
     return await Geolocator.getCurrentPosition();
   }
 
-
   @override
   Widget build(BuildContext context) {
+    bool doorsill = widget.doorsill;
+    bool runway = widget.runway;
+    bool elevator = widget.elevator;
+    bool parking = widget.parking;
+    bool toilet = widget.toilet;
+
     Firebase.initializeApp();
     all_marker.clear();
     bokji_marker.clear();
@@ -136,7 +158,6 @@ class _NaverMapTestState extends State<NaverMapTest> {
             .snapshots(),
         builder: (BuildContext context,
             AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
-
           if (count == 0) {
             getImage();
             print("클릭");
@@ -162,23 +183,92 @@ class _NaverMapTestState extends State<NaverMapTest> {
               print(name + " : " + info + "\n");
 
               if (category == "복지시설") {
-                bokji_marker.add(makeMarker(name, category, location, latitude,
-                    longitude, info, Colors.blueAccent, office_image));
-                all_marker.add(makeMarker(name, category, location, latitude,
-                    longitude, info, Colors.blueAccent, office_image) );
+                Marker marker = makeMarker(context, name, category, location, latitude,
+                    longitude, info, Colors.blueAccent, office_image);
+                bokji_marker.add(marker);
+                all_marker.add(marker);
+
+                if (!(doorsill || runway || elevator || parking || toilet)) {
+                  print_marker = all_marker;
+                } else {
+                  bool print = false;
+                  if (doorsill) {
+                    info.contains("문턱") ? print = true : print = false;
+                  }
+                  if (runway) {
+                    info.contains("경사로") ? print = true : print = false;
+                  }
+                  if (elevator) {
+                    info.contains("엘리베이터") ? print = true : print = false;
+                  }
+                  if (parking) {
+                    info.contains("주차장") ? print = true : print = false;
+                  }
+                  if (toilet) {
+                    info.contains("화장실") ? print = true : print = false;
+                  }
+                  if (print) {
+                    print_marker.add(marker);
+                  }
+                }
               } else if (category == "마트") {
-                mart_marker.add(makeMarker(name, category, location, latitude,
-                    longitude, info, Colors.redAccent, mart_image) );
-                all_marker.add(makeMarker(name, category, location, latitude,
-                    longitude, info, Colors.redAccent, mart_image));
+                Marker marker = makeMarker(context, name, category, location, latitude,
+                    longitude, info, Colors.redAccent, mart_image);
+                mart_marker.add(marker);
+                all_marker.add(marker);
+                if (!(doorsill || runway || elevator || parking || toilet)) {
+                  print_marker = all_marker;
+                } else {
+                  bool print = false;
+                  if (doorsill) {
+                    info.contains("주출입구 높이차이 제거") ? print = true : print = false;
+                  }
+                  if (runway) {
+                    info.contains("주출입구 접근로") ? print = true : print = false;
+                  }
+                  if (elevator) {
+                    info.contains("승강설비") ? print = true : print = false;
+                  }
+                  if (parking) {
+                    info.contains("장애인전용주차구역") ? print = true : print = false;
+                  }
+                  if (toilet) {
+                    info.contains("대변기") ? print = true : print = false;
+                  }
+                  if (print) {
+                    print_marker.add(marker);
+                  }
+                }
               } else if (category == "식당") {
-                rest_marker.add(makeMarker(name, category, location, latitude,
-                    longitude, info, Colors.purpleAccent, restaurant_image));
-                all_marker.add(makeMarker(name, category, location, latitude,
-                    longitude, info, Colors.purpleAccent, restaurant_image));
+                Marker marker = makeMarker(context, name, category, location, latitude,
+                    longitude, info, Colors.purpleAccent, restaurant_image);
+                rest_marker.add(marker);
+                all_marker.add(marker);
+                if (!(doorsill || runway || elevator || parking || toilet)) {
+                  print_marker = all_marker;
+                } else {
+                  bool print = false;
+                  if (doorsill) {
+                    info.contains("문턱") ? print = true : print = false;
+                  }
+                  if (runway) {
+                    info.contains("경사로") ? print = true : print = false;
+                  }
+                  if (elevator) {
+                    info.contains("엘리베이터") ? print = true : print = false;
+                  }
+                  if (parking) {
+                    info.contains("주차장") ? print = true : print = false;
+                  }
+                  if (toilet) {
+                    info.contains("화장실") ? print = true : print = false;
+                  }
+                  if (print) {
+                    print_marker.add(marker);
+                  }
+                }
               }
             }
-
 
             return Scaffold(
               key: _scaffoldKey,
@@ -187,10 +277,11 @@ class _NaverMapTestState extends State<NaverMapTest> {
                   children: <Widget>[
                     Container(
                       child: NaverMap(
-                        initialCameraPosition: CameraPosition(target: LatLng(lat,lng)),
+                        initialCameraPosition:
+                            CameraPosition(target: LatLng(lat, lng)),
                         onMapCreated: onMapCreated,
                         mapType: _mapType,
-                        markers:  test_marker,
+                        markers: print_marker,
                       ),
                     ),
                     Padding(
@@ -212,26 +303,33 @@ class _NaverMapTestState extends State<NaverMapTest> {
                           child: Row(children: <Widget>[
                             Expanded(
                                 child: TextField(
-                                  onTap: () {
-                                    Get.to(SearchScreen());
-                                    FocusManager.instance.primaryFocus?.unfocus();
+                              onTap: () {
+                                Get.to(SearchScreen());
+                                FocusManager.instance.primaryFocus?.unfocus();
+                              },
+                              decoration: InputDecoration(
+                                prefixIcon: Icon(
+                                  Icons.search,
+                                  color: Colors.black,
+                                  size: 20,
+                                ),
+                                suffixIcon: IconButton(
+                                  icon: Icon(Icons.filter_alt_sharp),
+                                  color: Colors.black,
+                                  onPressed: () {
+                                    Get.to(Searchfilter());
                                   },
-                                  decoration: InputDecoration(
-                                    prefixIcon: Icon(
-                                      Icons.search,
-                                      color: Colors.black,
-                                      size: 20,
-                                    ),
-                                    hintText: '검색',
-                                    labelStyle: TextStyle(color: Colors.black),
-                                  ),
-                                )),
+                                ),
+                                hintText: '검색',
+                                labelStyle: TextStyle(color: Colors.black),
+                              ),
+                            )),
                           ]),
                         ),
                       ),
                     ),
-
-                    Padding(padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                       child: Row(
                         // mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -240,8 +338,8 @@ class _NaverMapTestState extends State<NaverMapTest> {
                             width: 17,
                           ),
                         ],
-
-                      ),),
+                      ),
+                    ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(10, 60, 0, 0),
                       child: Column(
@@ -258,15 +356,13 @@ class _NaverMapTestState extends State<NaverMapTest> {
                                           test_marker = rest_marker;
                                           setState(() {});
                                         },
-                                        icon: Icon(
-                                            Icons.restaurant,
-                                            size: 18),
+                                        icon: Icon(Icons.restaurant, size: 18),
                                         label: Text("음식점 & 카페"),
                                         style: ElevatedButton.styleFrom(
                                           shape: RoundedRectangleBorder(
-                                            //모서리를 둥글게
+                                              //모서리를 둥글게
                                               borderRadius:
-                                              BorderRadius.circular(15)),
+                                                  BorderRadius.circular(15)),
                                           side: BorderSide(
                                             color: Colors.lightGreen,
                                           ),
@@ -282,8 +378,6 @@ class _NaverMapTestState extends State<NaverMapTest> {
                                       ),
                                     ]),
                                     onTap: () {},
-
-
                                   ),
                                   GestureDetector(
                                     child: Row(children: [
@@ -292,15 +386,13 @@ class _NaverMapTestState extends State<NaverMapTest> {
                                           // // test_marker = bokji_marker;
                                           setState(() {});
                                         },
-                                        icon: Icon(
-                                            Icons.medication,
-                                            size: 18),
+                                        icon: Icon(Icons.medication, size: 18),
                                         label: Text("병원"),
                                         style: ElevatedButton.styleFrom(
                                           shape: RoundedRectangleBorder(
-                                            //모서리를 둥글게
+                                              //모서리를 둥글게
                                               borderRadius:
-                                              BorderRadius.circular(15)),
+                                                  BorderRadius.circular(15)),
                                           side: BorderSide(
                                             color: Colors.lightGreen,
                                           ),
@@ -316,8 +408,6 @@ class _NaverMapTestState extends State<NaverMapTest> {
                                       ),
                                     ]),
                                     onTap: () {},
-
-
                                   ),
                                   GestureDetector(
                                     child: Row(children: [
@@ -332,9 +422,9 @@ class _NaverMapTestState extends State<NaverMapTest> {
                                         label: Text("복지시설"),
                                         style: ElevatedButton.styleFrom(
                                           shape: RoundedRectangleBorder(
-                                            //모서리를 둥글게
+                                              //모서리를 둥글게
                                               borderRadius:
-                                              BorderRadius.circular(15)),
+                                                  BorderRadius.circular(15)),
                                           side: BorderSide(
                                             color: Colors.lightGreen,
                                           ),
@@ -350,8 +440,6 @@ class _NaverMapTestState extends State<NaverMapTest> {
                                       ),
                                     ]),
                                     onTap: () {},
-
-
                                   ),
                                   GestureDetector(
                                     child: Row(children: [
@@ -360,15 +448,14 @@ class _NaverMapTestState extends State<NaverMapTest> {
                                           // // test_marker = bokji_marker;
                                           setState(() {});
                                         },
-                                        icon: Icon(
-                                            Icons.aspect_ratio_outlined,
+                                        icon: Icon(Icons.aspect_ratio_outlined,
                                             size: 18),
                                         label: Text("편의시설"),
                                         style: ElevatedButton.styleFrom(
                                           shape: RoundedRectangleBorder(
-                                            //모서리를 둥글게
+                                              //모서리를 둥글게
                                               borderRadius:
-                                              BorderRadius.circular(15)),
+                                                  BorderRadius.circular(15)),
                                           side: BorderSide(
                                             color: Colors.lightGreen,
                                           ),
@@ -384,8 +471,6 @@ class _NaverMapTestState extends State<NaverMapTest> {
                                       ),
                                     ]),
                                     onTap: () {},
-
-
                                   ),
                                   GestureDetector(
                                     child: Row(children: [
@@ -394,15 +479,13 @@ class _NaverMapTestState extends State<NaverMapTest> {
                                           // test_marker = bokji_marker;
                                           setState(() {});
                                         },
-                                        icon: Icon(
-                                            Icons.wc_outlined,
-                                            size: 18),
+                                        icon: Icon(Icons.wc_outlined, size: 18),
                                         label: Text("화장실"),
                                         style: ElevatedButton.styleFrom(
                                           shape: RoundedRectangleBorder(
-                                            //모서리를 둥글게
+                                              //모서리를 둥글게
                                               borderRadius:
-                                              BorderRadius.circular(15)),
+                                                  BorderRadius.circular(15)),
                                           side: BorderSide(
                                             color: Colors.lightGreen,
                                           ),
@@ -418,25 +501,22 @@ class _NaverMapTestState extends State<NaverMapTest> {
                                       ),
                                     ]),
                                     onTap: () {},
-
-
                                   ),
                                   GestureDetector(
                                     child: Row(children: [
                                       OutlinedButton.icon(
                                         onPressed: () {
                                           test_marker = mart_marker;
-                                          // setState(() {});
+                                          setState(() {});
                                         },
-                                        icon: Icon(
-                                            Icons.shopping_cart_outlined,
+                                        icon: Icon(Icons.shopping_cart_outlined,
                                             size: 18),
                                         label: Text("마트"),
                                         style: ElevatedButton.styleFrom(
                                           shape: RoundedRectangleBorder(
-                                            //모서리를 둥글게
+                                              //모서리를 둥글게
                                               borderRadius:
-                                              BorderRadius.circular(15)),
+                                                  BorderRadius.circular(15)),
                                           side: BorderSide(
                                             color: Colors.lightGreen,
                                           ),
@@ -452,25 +532,22 @@ class _NaverMapTestState extends State<NaverMapTest> {
                                       ),
                                     ]),
                                     onTap: () {},
-
-
                                   ),
                                   GestureDetector(
                                     child: Row(children: [
                                       OutlinedButton.icon(
                                         onPressed: () {
                                           // // test_marker = bokji_marker;
-                                          // setState(() {});
+                                          setState(() {});
                                         },
-                                        icon: Icon(
-                                            Icons.menu_book_outlined,
+                                        icon: Icon(Icons.menu_book_outlined,
                                             size: 18),
                                         label: Text("교육시설"),
                                         style: ElevatedButton.styleFrom(
                                           shape: RoundedRectangleBorder(
-                                            //모서리를 둥글게
+                                              //모서리를 둥글게
                                               borderRadius:
-                                              BorderRadius.circular(15)),
+                                                  BorderRadius.circular(15)),
                                           side: BorderSide(
                                             color: Colors.lightGreen,
                                           ),
@@ -486,25 +563,22 @@ class _NaverMapTestState extends State<NaverMapTest> {
                                       ),
                                     ]),
                                     onTap: () {},
-
-
                                   ),
                                   GestureDetector(
                                     child: Row(children: [
                                       OutlinedButton.icon(
                                         onPressed: () {
                                           // // test_marker = bokji_marker;
-                                          // setState(() {});
+                                          setState(() {});
                                         },
-                                        icon: Icon(
-                                            Icons.bed_outlined,
-                                            size: 18),
+                                        icon:
+                                            Icon(Icons.bed_outlined, size: 18),
                                         label: Text("숙박시설"),
                                         style: ElevatedButton.styleFrom(
                                           shape: RoundedRectangleBorder(
-                                            //모서리를 둥글게
+                                              //모서리를 둥글게
                                               borderRadius:
-                                              BorderRadius.circular(15)),
+                                                  BorderRadius.circular(15)),
                                           side: BorderSide(
                                             color: Colors.lightGreen,
                                           ),
@@ -520,25 +594,22 @@ class _NaverMapTestState extends State<NaverMapTest> {
                                       ),
                                     ]),
                                     onTap: () {},
-
-
                                   ),
                                   GestureDetector(
                                     child: Row(children: [
                                       OutlinedButton.icon(
                                         onPressed: () {
                                           // // test_marker = bokji_marker;
-                                          // setState(() {});
+                                          setState(() {});
                                         },
-                                        icon: Icon(
-                                            Icons.more_outlined,
-                                            size: 18),
+                                        icon:
+                                            Icon(Icons.more_outlined, size: 18),
                                         label: Text("기타"),
                                         style: ElevatedButton.styleFrom(
                                           shape: RoundedRectangleBorder(
-                                            //모서리를 둥글게
+                                              //모서리를 둥글게
                                               borderRadius:
-                                              BorderRadius.circular(15)),
+                                                  BorderRadius.circular(15)),
                                           side: BorderSide(
                                             color: Colors.lightGreen,
                                           ),
@@ -554,8 +625,6 @@ class _NaverMapTestState extends State<NaverMapTest> {
                                       ),
                                     ]),
                                     onTap: () {},
-
-
                                   ),
                                   // _mainButton( Icons.restaurant, "음식점 & 카페"),
                                   // _mainButton(Icons.medication, "병원"),
@@ -576,7 +645,6 @@ class _NaverMapTestState extends State<NaverMapTest> {
                   ],
                 ),
               ),
-
               bottomNavigationBar: BottomAppBar(),
               drawer: Drawer(
                 child: ListView(
@@ -659,7 +727,7 @@ class _NaverMapTestState extends State<NaverMapTest> {
                     ListTile(
                       title: Text('설정'),
                       onTap: () {
-                       Get.to(MyPage_Setting());
+                        Get.to(MyPage_Setting());
                       },
                     ),
                     ListTile(
@@ -698,14 +766,20 @@ class _NaverMapTestState extends State<NaverMapTest> {
                             actions: <Widget>[
                               TextButton(
                                 onPressed: () => Navigator.of(context).pop(),
-                                child: Text('취소',style: TextStyle(color: Colors.black),),
+                                child: Text(
+                                  '취소',
+                                  style: TextStyle(color: Colors.black),
+                                ),
                               ),
                               TextButton(
                                 onPressed: () async {
                                   final url = Uri.parse('tel:0542311117');
                                   launchUrl(url);
                                 },
-                                child: Text('연락하기',style: TextStyle(color: Colors.black),),
+                                child: Text(
+                                  '연락하기',
+                                  style: TextStyle(color: Colors.black),
+                                ),
                               ),
                             ],
                           ),
@@ -715,16 +789,17 @@ class _NaverMapTestState extends State<NaverMapTest> {
                     ),
                   ),
                   Align(
-                    //현재 위치 아이콘
+                      //현재 위치 아이콘
                       alignment: Alignment.bottomRight,
                       child: FloatingActionButton(
                         onPressed: () async {
                           getCurrentLocation();
 
-                          final controller= await _controller.future;
-                          controller.moveCamera(
-                              CameraUpdate.toCameraPosition(CameraPosition(target: LatLng(position.latitude,position.longitude)))
-                          );
+                          final controller = await _controller.future;
+                          controller.moveCamera(CameraUpdate.toCameraPosition(
+                              CameraPosition(
+                                  target: LatLng(
+                                      position.latitude, position.longitude))));
                         },
                         child: Icon(Icons.my_location),
                       ))
@@ -740,28 +815,44 @@ class _NaverMapTestState extends State<NaverMapTest> {
     _controller.complete(controller);
   }
 
-  Marker makeMarker(String name, String category, String location,
-      double latitude, double longitude, String info, Color color, OverlayImage test_image) {
+  Marker makeMarker(
+      BuildContext context,
+      String name,
+      String category,
+      String location,
+      double latitude,
+      double longitude,
+      String info,
+      Color color,
+      OverlayImage test_image) {
     return Marker(
       // icon: OverlayImage(AssetImage('assets/images/hgu.png'), AssetBundleImageKey(null, null, null)),
       // icon: OverlayImage(Image( image: AssetImage('assets/images/hgu.png'),)),
-        icon: test_image,
-        onMarkerTab: (marker, iconSize) {
-          showModalBottomSheet(
-              isScrollControlled: true,
-              shape: RoundedRectangleBorder(
-                  borderRadius:
-                  BorderRadius.vertical(top: Radius.circular(10))),
-              context: context,
-              builder: (context) => Container(
-                height: getScreenHeight(context) * 0.3,
-                child: placeModal(name, category, location, info),
-              ));
-        },
-        width: 40,
-        height: 50,
-        position: LatLng(latitude, longitude),
-        markerId: name,
+      icon: test_image,
+      onMarkerTab: (marker, iconSize) {
+        showModalBottomSheet(
+          context: context,
+          enableDrag: false,
+          isScrollControlled: true,
+          clipBehavior: Clip.antiAliasWithSaveLayer,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(10))),
+          builder: (context) => DraggableScrollableSheet(
+            expand: false,
+            snap: true,
+            initialChildSize: 0.35,
+            maxChildSize: 0.9,
+            minChildSize: 0.35,
+            builder: (context, scrollController) => SingleChildScrollView(
+                controller: scrollController,
+                child: placeModal(name, category, location, info)),
+          ),
+        );
+      },
+      width: 40,
+      height: 40,
+      position: LatLng(latitude, longitude),
+      markerId: name,
     );
   }
 }

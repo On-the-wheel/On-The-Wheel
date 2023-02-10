@@ -77,7 +77,7 @@ class _CarouselState extends State<Carousel> {
               children: [
                 ElevatedButton.icon(
                   onPressed: () {
-                    Get.to(NaverMapTest());
+                    Get.to(NaverMapTest(doorsill: false, runway: false, elevator: false, parking: false, toilet: false,));
                   },
                   icon: Icon(
                     Icons.error,
